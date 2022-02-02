@@ -585,7 +585,7 @@ instance.prototype.init_feedbacks = function () {
 instance.prototype.actions = function () {
 	let self = this
 
-	self.system.emit('instance_actions', self.id, {
+	self.setActions({
 		xpoint_take: {
 			label: 'Crosspoint Take',
 			options: [
