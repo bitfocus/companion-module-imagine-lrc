@@ -395,7 +395,9 @@ instance.prototype.config_fields = function () {
 				'<b><u>Configuration Notes:</u></b><br/>' +
 				'<b>User ID:</b> Numeric identifier for any commands requiring this parameter (e.g. LOCK, PROTECT, XBUFFER)<br/>' +
 				'<b>Salvo Count:</b> Number of salvos to query from the router (range from 0 to n)<br/>' +
-				'<b>Allow Empty Crosspoint Destination:</b> Safeguard to prevent routing a single source to every destination in a single crosspoint command',
+				'<b>Allow Empty Crosspoint Destination:</b> Safeguard to prevent routing a single source to every destination in a single crosspoint command<br/>' +
+				'<b>Crosspoint Format:</b> Sets sources/destinations used in crosspoint commands to be sent as either numbers (default) or names.' +
+				' If you use a variable in the respective fields, you should set this to the same format as your variable values as the values will be sent unmodified.'
 		},
 		{
 			type: 'textinput',
@@ -438,9 +440,20 @@ instance.prototype.config_fields = function () {
 			type: 'checkbox',
 			id: 'allow_empty_xpoint_dest',
 			label: 'Allow Empty Crosspoint Destination',
-			width: 3,
+			width: 6,
 			default: false,
 		},
+		{
+			type: 'dropdown',
+			id: 'crosspoint_format',
+			label: 'Crosspoint Format',
+			width: 6,
+			default: 'numbers',
+			choices: [
+				{ id: 'numbers', label: 'Numbers' },
+				{ id: 'names', label: 'Names' },
+			]
+		}
 	]
 }
 
