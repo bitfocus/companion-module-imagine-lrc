@@ -145,8 +145,6 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('data', function (buffer) {
 			let indata = buffer.toString('utf8')
 
-			// self.log('debug', indata)
-
 			const dest_count_match = indata.matchAll(/~DEST%COUNT#{(\d+)}\\/g)
 			const dest_count_matches = [...dest_count_match]
 			if (dest_count_matches.length > 0) {
