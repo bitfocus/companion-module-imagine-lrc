@@ -1217,6 +1217,10 @@ instance.prototype.action = function (action) {
 	}
 
 	if (lrc_type !== undefined && lrc_op !== undefined && lrc_args !== undefined) {
+		// Allow for specifying variables manually in button config
+		self.parseVariables(lrc_args, function(value) {
+			lrc_args = unescape(value);
+		})
 		self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 	} else {
 		self.log('error', 'Missing LRC command parameter')
