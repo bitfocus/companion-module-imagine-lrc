@@ -1181,7 +1181,6 @@ instance.prototype.action = function (action) {
 			lrc_type = self.LRC_CMD_TYPE_LOCK.id
 			lrc_op = self.LRC_OP_CHANGE_REQUEST.id
 			let lock_args = []
-			// let lock_dest_type = (options.destination.length > 1) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
 			let lock_dest_type = !isNaN(options.destination) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
 			lock_args.push(`D${lock_dest_type}{${options.destination.join()}}`)
 			lock_args.push(`V${self.LRC_ARG_TYPE_STRING}{${options.status}}`)
