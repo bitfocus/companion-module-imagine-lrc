@@ -1155,8 +1155,15 @@ instance.prototype.action = function (action) {
 			let xpreset_args = []
 			let xpreset_source = this.parseTarget('source', options.source)
 			let xpreset_source_type =
-				xpreset_source.length > 1 || isNaN(xpreset_source[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			let xpreset_dest = this.parseTarget('destination', options.destination)
+				isNaN(xpreset_source) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+			let xpreset_button_dest = options.destination
+			// Destination is an array even if there's just one item since we're using tags
+			let xpreset_dests = []
+			xpreset_button_dest.forEach(function (target) {
+				let xpreset_parsed_dest = self.parseTarget('destination', target)
+				if (xpreset_parsed_dest) { xpreset_dests.push(xpreset_parsed_dest) }
+			});
+			let xpreset_dest = (xpreset_dests.length > 1) ? xpreset_dests.join(',') : xpreset_dests[0]
 			let xpreset_dest_type =
 				xpreset_dest.length > 1 || isNaN(xpreset_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 			let xpreset_dest_arg = `D${xpreset_dest_type}{${xpreset_dest}}`
