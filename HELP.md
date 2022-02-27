@@ -115,6 +115,14 @@ Destination lock state information is automatically updated by the router upon c
 Button colors can be changed in response to the state (protected/not-protected) of a given destination.
 Destination protect state information is automatically updated by the router upon change of protect state.
 
+## Presets
+
+### Salvos
+
+A preset is automatically created for each salvo provided by the router.
+Action is `Salvo Execution` for the given salvo.
+Feedback is `Salvo State` in green if the given salvo is active.
+
 ## Protocol Documentation
 
 Full documentation for the LRC protocol is available in the [Imagine Communications Customer Portal](https://community.imaginecommunications.com/)

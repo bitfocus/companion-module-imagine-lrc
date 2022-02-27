@@ -255,6 +255,7 @@ instance.prototype.init_tcp = function () {
 				self.log('debug', 'Salvos Updated: ' + upd_salvo_names.join(', '))
 				self.saveConfig()
 				self.checkFeedbacks('salvo_state')
+				self.init_presets()
 			}
 
 			const salvo_state_match = indata.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
@@ -886,6 +887,49 @@ instance.prototype.actions = function () {
 			],
 		},
 	})
+}
+
+instance.prototype.init_presets = function () {
+	let self = this;
+	let presets = [];
+
+	let preset_salvo_names = []
+	self.LRC_SALVOS.forEach(function (salvo) {
+		presets.push({
+			category: 'Salvos',
+			label: salvo.id,
+			bank: {
+				style: 'text',
+				text: salvo.id,
+				size: 'auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{
+				action: 'salvo_exec',
+				options: {
+					salvo_id: salvo.id,
+				}
+			}],
+			feedbacks: [{
+				type: 'salvo_state',
+				options: {
+					salvo: salvo.id
+				},
+				style: {
+					bgcolor: self.rgb(0, 204, 0)
+				}
+			}]
+		});
+		preset_salvo_names.push(salvo.id);
+	});
+	if (preset_salvo_names.length > 0) {
+		self.log('debug', 'Added presets for salvos: ' + preset_salvo_names.join(', '))
+	} else {
+		self.log('debug', 'No salvos found, no presets added')
+	}
+
+	self.setPresetDefinitions(presets);
 }
 
 instance.prototype.sendSocket = function (message) {
