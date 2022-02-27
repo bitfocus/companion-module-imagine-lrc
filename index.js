@@ -1047,14 +1047,18 @@ instance.prototype.parseTarget = function(target_type, target_name) {
 	if (parsed_target == target_name) {
 		// Parsed target is equal to button target, so variables weren't used.
 		// Translate button target to numbers or names depending on configuration
-		let found_target = this.findTarget('target_type', target_name)
-		if (self.config.crosspoint_format === 'numbers') {
-			target = found_target.id;
-		} else if (self.config.crosspoint_format === 'names') {
-			target = found_target.label;
+		let found_target = this.findTarget(target_type, target_name)
+		if (found_target) {
+			if (self.config.crosspoint_format === 'numbers') {
+				target = found_target.id;
+			} else if (self.config.crosspoint_format === 'names') {
+				target = found_target.label;
+			} else {
+				self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
+				return
+			}
 		} else {
-			self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
-			return
+			self.log('error', `Could not find target ${target_type} for '${target_name}'`)
 		}
 	} else {
 		// Parsed source is NOT equal to button source, so variables were used.
