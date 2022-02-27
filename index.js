@@ -1088,7 +1088,13 @@ instance.prototype.action = function (action) {
 
 			let button_dest = options.destination
 			let dest_level = options.destination_level
-			let dest = this.parseTarget('destination', button_dest)
+			// Destination is an array even if there's just one item since we're using tags
+			let dests = []
+			button_dest.forEach(function (target) {
+				let parsed_dest = self.parseTarget('destination', target)
+				if (parsed_dest) { dests.push(parsed_dest) }
+			});
+			let dest = (dests.length > 1) ? dests.join(',') : dests[0]
 			let dest_type =
 				isNaN(dest) || (dest_level && isNaN(dest_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 
