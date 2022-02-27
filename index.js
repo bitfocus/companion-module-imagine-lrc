@@ -1100,8 +1100,12 @@ instance.prototype.action = function (action) {
 
 			let source_arg_value = (!source_level || source_level === undefined || source_level.length == 0) ? source : source + '.' + source_level
 			let dest_arg_value = (!dest_level || dest_level === undefined || dest_level.length == 0) ? dest : dest + '.' + dest_level
-			xpoint_args.push('S' + source_type + '{' + source_arg_value + '}')
-			xpoint_args.push('D' + dest_type + '{' + dest_arg_value + '}')
+			let source_arg = 'S' + source_type + '{' + source_arg_value + '}'
+			let dest_arg = 'D' + dest_type + '{' + dest_arg_value + '}'
+			xpoint_args.push(source_arg, dest_arg)
+			if (source_type !== dest_type) {
+				this.log('warn', `Crosspoint Source (${source_arg}) and destination (${dest_arg}) argument types don't match, this may result in unpredictable routing results`)
+			}
 
 			if (!self.config.allow_empty_xpoint_dest && (!dest || (Array.isArray(dest) && dest.length === 0))) {
 				// Safeguard to prevent routing the given source to every destination
