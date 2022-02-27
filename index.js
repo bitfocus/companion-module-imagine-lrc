@@ -1159,9 +1159,13 @@ instance.prototype.action = function (action) {
 			let xpreset_dest = this.parseTarget('destination', options.destination)
 			let xpreset_dest_type =
 				xpreset_dest.length > 1 || isNaN(xpreset_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			xpreset_args.push(`D${xpreset_dest_type}{${xpreset_dest.join()}}`)
-			xpreset_args.push(`S${xpreset_source_type}{${xpreset_source.join()}}`)
-			xpreset_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+			let xpreset_dest_arg = `D${xpreset_dest_type}{${xpreset_dest}}`
+			let xpreset_src_arg = `S${xpreset_source_type}{${xpreset_source}}`
+			let xpreset_user_arg = `U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`
+			xpreset_args.push(xpreset_dest_arg, xpreset_src_arg, xpreset_user_arg)
+			if (xpreset_source_type !== xpreset_dest_type) {
+				this.log('warn', `Crosspoint Preset Source (${xpreset_src_arg}) and destination (${xpreset_dest_arg}) argument types don't match, this may result in unpredictable routing results`)
+			}
 
 			if (
 				!self.config.allow_empty_xpoint_dest &&
