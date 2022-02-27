@@ -1032,6 +1032,38 @@ instance.prototype.findTarget = function (target_type, needle) {
 	return undefined
 }
 
+instance.prototype.parseTarget = function(target_type, target_name) {
+	let self = this
+	let parsed_target = ''
+	let target = ''
+
+	// Attempt to parse the provided target_name to translate any variables
+	self.parseVariables(target_name, function(value) {
+		parsed_target = unescape(value);
+	})
+
+	// Check if parsed target is different from original target to try and determine
+	// if it was selected from the dropdown or set using a variable
+	if (parsed_target == target_name) {
+		// Parsed target is equal to button target, so variables weren't used.
+		// Translate button target to numbers or names depending on configuration
+		let found_target = this.findTarget('target_type', target_name)
+		if (self.config.crosspoint_format === 'numbers') {
+			target = found_target.id;
+		} else if (self.config.crosspoint_format === 'names') {
+			target = found_target.label;
+		} else {
+			self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
+			return
+		}
+	} else {
+		// Parsed source is NOT equal to button source, so variables were used.
+		// Send whatever was specified in the variable without any modification/translation
+		target = parsed_target
+	}
+	return target
+}
+
 instance.prototype.action = function (action) {
 	let self = this
 	let options = action.options
@@ -1043,67 +1075,16 @@ instance.prototype.action = function (action) {
 		case 'xpoint_take':
 			// ~XPOINT:S${SAT1.SD};D${MON6.SD}\
 			let xpoint_args = []
+
 			let button_source = options.source
-			let parsed_source = ''
-			let source = ''
 			let source_level = options.source_level
-
-			// Allow for specifying variables manually in button config
-			// Need to call this here (as opposed to only later) to properly set the argument type
-			self.parseVariables(button_source, function(value) {
-				parsed_source = unescape(value);
-			})
-
-			// Check if parsed source is different from original source to try and determine
-			// if it was selected from the dropdown or set using a variable
-			if (parsed_source == button_source) {
-				// Parsed source is equal to button source, so variables weren't used.
-				// Translate button source to numbers or names depending on configuration
-				let source_target = this.findTarget('source', button_source)
-				if (self.config.crosspoint_format === 'numbers') {
-					source = source_target.id;
-				} else if (self.config.crosspoint_format === 'names') {
-					source = source_target.label;
-				} else {
-					self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
-					return
-				}
-			} else {
-				// Parsed source is NOT equal to button source, so variables were used.
-				// Send whatever was specified in the variable without any modification/translation
-				source = parsed_source
-			}
+			let source = this.parseTarget('source', button_source)
 			let source_type =
 				isNaN(source) || (source_level && isNaN(source_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 
 			let button_dest = options.destination
-			let parsed_dest = ''
-			let dest = ''
 			let dest_level = options.destination_level
-			// Allow for specifying variables manually in button config
-			// Need to call this here (as opposed to only later) to properly set the argument type
-			self.parseVariables(button_dest, function(value) {
-				parsed_dest = unescape(value);
-			})
-			// Check if parsed destination is different from original destination to try and determine
-			// if it was selected from the dropdown or set using a variable
-			if (parsed_dest == button_dest) {
-				// Parsed destination is equal to button destination, so variables weren't used.
-				// Translate button destination to numbers or names depending on configuration
-				let dest_target = this.findTarget('destination', button_dest)
-				if (self.config.crosspoint_format === 'numbers') {
-					dest = dest_target.id;
-				} else if (self.config.crosspoint_format === 'names') {
-					dest = dest_target.label;
-				} else {
-					self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
-					return
-				}
-			} else {
-				// Parsed destination is NOT equal to button destination, so variables were used.
-				// Send whatever was specified in the variable without any modification/translation
-				dest = parsed_dest
-			}
+			let dest = this.parseTarget('destination', button_dest)
 			let dest_type =
 				isNaN(dest) || (dest_level && isNaN(dest_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 
@@ -1135,7 +1116,7 @@ instance.prototype.action = function (action) {
 		case 'xdisconnect':
 			// ~XDISCONNECT:D${ALLD 1}\
 			let xdisc_args = []
-			let xdisc_dest = options.destination
+			let xdisc_dest = this.parseTarget('destination', options.destination)
 			let xdisc_dest_type =
 				xdisc_dest.length > 1 || isNaN(xdisc_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 			xdisc_args.push(`D${xdisc_dest_type}{${xdisc_dest.join()}}`)
@@ -1158,10 +1139,10 @@ instance.prototype.action = function (action) {
 		case 'xpreset':
 			// ~XPRESET:D#{2};S#{1};U#{1}\
 			let xpreset_args = []
-			let xpreset_source = options.source
+			let xpreset_source = this.parseTarget('source', options.source)
 			let xpreset_source_type =
 				xpreset_source.length > 1 || isNaN(xpreset_source[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			let xpreset_dest = options.destination
+			let xpreset_dest = this.parseTarget('destination', options.destination)
 			let xpreset_dest_type =
 				xpreset_dest.length > 1 || isNaN(xpreset_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 			xpreset_args.push(`D${xpreset_dest_type}{${xpreset_dest.join()}}`)
