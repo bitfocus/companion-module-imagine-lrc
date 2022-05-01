@@ -145,8 +145,6 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('data', function (buffer) {
 			let indata = buffer.toString('utf8')
 
-			// self.log('debug', indata)
-
 			const dest_count_match = indata.matchAll(/~DEST%COUNT#{(\d+)}\\/g)
 			const dest_count_matches = [...dest_count_match]
 			if (dest_count_matches.length > 0) {
@@ -257,6 +255,7 @@ instance.prototype.init_tcp = function () {
 				self.log('debug', 'Salvos Updated: ' + upd_salvo_names.join(', '))
 				self.saveConfig()
 				self.checkFeedbacks('salvo_state')
+				self.init_presets()
 			}
 
 			const salvo_state_match = indata.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
@@ -397,7 +396,9 @@ instance.prototype.config_fields = function () {
 				'<b><u>Configuration Notes:</u></b><br/>' +
 				'<b>User ID:</b> Numeric identifier for any commands requiring this parameter (e.g. LOCK, PROTECT, XBUFFER)<br/>' +
 				'<b>Salvo Count:</b> Number of salvos to query from the router (range from 0 to n)<br/>' +
-				'<b>Allow Empty Crosspoint Destination:</b> Safeguard to prevent routing a single source to every destination in a single crosspoint command',
+				'<b>Allow Empty Crosspoint Destination:</b> Safeguard to prevent routing a single source to every destination in a single crosspoint command<br/>' +
+				'<b>Crosspoint Format:</b> Sets sources/destinations used in crosspoint commands to be sent as either numbers (default) or names.' +
+				' If you use a variable in the respective fields, you should set this to the same format as your variable values as the values will be sent unmodified.'
 		},
 		{
 			type: 'textinput',
@@ -440,9 +441,20 @@ instance.prototype.config_fields = function () {
 			type: 'checkbox',
 			id: 'allow_empty_xpoint_dest',
 			label: 'Allow Empty Crosspoint Destination',
-			width: 3,
+			width: 6,
 			default: false,
 		},
+		{
+			type: 'dropdown',
+			id: 'crosspoint_format',
+			label: 'Crosspoint Format',
+			width: 6,
+			default: 'numbers',
+			choices: [
+				{ id: 'numbers', label: 'Numbers' },
+				{ id: 'names', label: 'Names' },
+			]
+		}
 	]
 }
 
@@ -595,6 +607,7 @@ instance.prototype.actions = function () {
 					id: 'source',
 					tooltip: 'Specify a source by name (e.g. "SAT 1") or number (e.g. 6)',
 					minChoicesForSearch: 0,
+					allowCustom: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_SOURCES,
 					default: '1',
@@ -605,6 +618,7 @@ instance.prototype.actions = function () {
 					id: 'source_level',
 					tooltip: 'Specify a source level (e.g. 1, "Level 1")',
 					minChoicesForSearch: 0,
+					allowCustom: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_CHANNELS,
 					default: [],
@@ -618,7 +632,7 @@ instance.prototype.actions = function () {
 						'Multiple destinations may be specified separated by commas (e.g. "MON 6,MON 5,MON 4" or "1,2,3"). ' +
 						'*WARNING* An empty destination resolves to all logical destinations.',
 					minChoicesForSearch: 0,
-					tags: true,
+					allowCustom: true,
 					multiple: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_DESTINATIONS,
@@ -630,6 +644,7 @@ instance.prototype.actions = function () {
 					id: 'destination_level',
 					tooltip: 'Specify a destination level (e.g. 1, "Level 1")',
 					minChoicesForSearch: 0,
+					allowCustom: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_CHANNELS,
 					default: [],
@@ -665,7 +680,7 @@ instance.prototype.actions = function () {
 						'Multiple destinations may be specified separated by commas (e.g. "MON 6,MON 5,MON 4" or "1,2,3"). ' +
 						'*WARNING* An empty destination resolves to all logical destinations.',
 					minChoicesForSearch: 0,
-					tags: true,
+					allowCustom: true,
 					multiple: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_DESTINATIONS,
@@ -680,10 +695,10 @@ instance.prototype.actions = function () {
 					type: 'dropdown',
 					label: 'Source',
 					id: 'source',
-					tooltip: 'Specify one or more sources',
+					tooltip: 'Specify one source',
 					minChoicesForSearch: 0,
-					tags: true,
-					multiple: true,
+					allowCustom: true,
+					multiple: false,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_SOURCES,
 					default: [],
@@ -696,7 +711,7 @@ instance.prototype.actions = function () {
 					tooltip:
 						'Specify one or more destinations' + '*WARNING* An empty destination resolves to all logical destinations.',
 					minChoicesForSearch: 0,
-					tags: true,
+					allowCustom: true,
 					multiple: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_DESTINATIONS,
@@ -713,6 +728,7 @@ instance.prototype.actions = function () {
 					id: 'salvo_id',
 					tooltip: 'Specify a salvo by name (e.g. "REST") or number (e.g. 6)',
 					minChoicesForSearch: 0,
+					allowCustom: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_SALVOS,
 					default: '1',
@@ -739,7 +755,7 @@ instance.prototype.actions = function () {
 						'Multiple destinations may be specified separated by commas (e.g. "MON 6,MON 5,MON 4" or "1,2,3"). ' +
 						'*WARNING* An empty destination resolves to all logical destinations.',
 					minChoicesForSearch: 0,
-					tags: true,
+					allowCustom: true,
 					multiple: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_DESTINATIONS,
@@ -777,7 +793,7 @@ instance.prototype.actions = function () {
 						'Multiple destinations may be specified separated by commas (e.g. "MON 6,MON 5,MON 4" or "1,2,3"). ' +
 						'*WARNING* An empty destination resolves to all logical destinations.',
 					minChoicesForSearch: 0,
-					tags: true,
+					allowCustom: true,
 					multiple: true,
 					regex: '/^[^~\\{},]+$/',
 					choices: self.LRC_DESTINATIONS,
@@ -871,6 +887,49 @@ instance.prototype.actions = function () {
 			],
 		},
 	})
+}
+
+instance.prototype.init_presets = function () {
+	let self = this;
+	let presets = [];
+
+	let preset_salvo_names = []
+	self.LRC_SALVOS.forEach(function (salvo) {
+		presets.push({
+			category: 'Salvos',
+			label: salvo.id,
+			bank: {
+				style: 'text',
+				text: salvo.id,
+				size: 'auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{
+				action: 'salvo_exec',
+				options: {
+					salvo_id: salvo.id,
+				}
+			}],
+			feedbacks: [{
+				type: 'salvo_state',
+				options: {
+					salvo: salvo.id
+				},
+				style: {
+					bgcolor: self.rgb(0, 204, 0)
+				}
+			}]
+		});
+		preset_salvo_names.push(salvo.id);
+	});
+	if (preset_salvo_names.length > 0) {
+		self.log('debug', 'Added presets for salvos: ' + preset_salvo_names.join(', '))
+	} else {
+		self.log('debug', 'No salvos found, no presets added')
+	}
+
+	self.setPresetDefinitions(presets);
 }
 
 instance.prototype.sendSocket = function (message) {
@@ -973,6 +1032,42 @@ instance.prototype.findTarget = function (target_type, needle) {
 	return undefined
 }
 
+instance.prototype.parseTarget = function(target_type, target_name) {
+	let self = this
+	let parsed_target = ''
+	let target = ''
+
+	// Attempt to parse the provided target_name to translate any variables
+	self.parseVariables(target_name, function(value) {
+		parsed_target = unescape(value);
+	})
+
+	// Check if parsed target is different from original target to try and determine
+	// if it was selected from the dropdown or set using a variable
+	if (parsed_target == target_name) {
+		// Parsed target is equal to button target, so variables weren't used.
+		// Translate button target to numbers or names depending on configuration
+		let found_target = this.findTarget(target_type, target_name)
+		if (found_target) {
+			if (self.config.crosspoint_format === 'numbers') {
+				target = found_target.id;
+			} else if (self.config.crosspoint_format === 'names') {
+				target = found_target.label;
+			} else {
+				self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
+				return
+			}
+		} else {
+			self.log('error', `Could not find target ${target_type} for '${target_name}'`)
+		}
+	} else {
+		// Parsed source is NOT equal to button source, so variables were used.
+		// Send whatever was specified in the variable without any modification/translation
+		target = parsed_target
+	}
+	return target
+}
+
 instance.prototype.action = function (action) {
 	let self = this
 	let options = action.options
@@ -984,18 +1079,33 @@ instance.prototype.action = function (action) {
 		case 'xpoint_take':
 			// ~XPOINT:S${SAT1.SD};D${MON6.SD}\
 			let xpoint_args = []
-			let source = options.source
+
+			let button_source = options.source
 			let source_level = options.source_level
+			let source = this.parseTarget('source', button_source)
 			let source_type =
 				isNaN(source) || (source_level && isNaN(source_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			let dest = options.destination
+
+			let button_dest = options.destination
 			let dest_level = options.destination_level
+			// Destination is an array even if there's just one item since we're using tags
+			let dests = []
+			button_dest.forEach(function (target) {
+				let parsed_dest = self.parseTarget('destination', target)
+				if (parsed_dest) { dests.push(parsed_dest) }
+			});
+			let dest = (dests.length > 1) ? dests.join(',') : dests[0]
 			let dest_type =
 				isNaN(dest) || (dest_level && isNaN(dest_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			let source_arg_value = !source_level ? source : source + '.' + source_level
-			let dest_arg_value = !dest_level ? dest : dest + '.' + dest_level
-			xpoint_args.push('S' + source_type + '{' + source_arg_value + '}')
-			xpoint_args.push('D' + dest_type + '{' + dest_arg_value + '}')
+
+			let source_arg_value = (!source_level || source_level === undefined || source_level.length == 0) ? source : source + '.' + source_level
+			let dest_arg_value = (!dest_level || dest_level === undefined || dest_level.length == 0) ? dest : dest + '.' + dest_level
+			let source_arg = 'S' + source_type + '{' + source_arg_value + '}'
+			let dest_arg = 'D' + dest_type + '{' + dest_arg_value + '}'
+			xpoint_args.push(source_arg, dest_arg)
+			if (source_type !== dest_type) {
+				this.log('warn', `Crosspoint Source (${source_arg}) and destination (${dest_arg}) argument types don't match, this may result in unpredictable routing results`)
+			}
 
 			if (!self.config.allow_empty_xpoint_dest && (!dest || (Array.isArray(dest) && dest.length === 0))) {
 				// Safeguard to prevent routing the given source to every destination
@@ -1020,7 +1130,7 @@ instance.prototype.action = function (action) {
 		case 'xdisconnect':
 			// ~XDISCONNECT:D${ALLD 1}\
 			let xdisc_args = []
-			let xdisc_dest = options.destination
+			let xdisc_dest = this.parseTarget('destination', options.destination)
 			let xdisc_dest_type =
 				xdisc_dest.length > 1 || isNaN(xdisc_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
 			xdisc_args.push(`D${xdisc_dest_type}{${xdisc_dest.join()}}`)
@@ -1043,15 +1153,26 @@ instance.prototype.action = function (action) {
 		case 'xpreset':
 			// ~XPRESET:D#{2};S#{1};U#{1}\
 			let xpreset_args = []
-			let xpreset_source = options.source
+			let xpreset_source = this.parseTarget('source', options.source)
 			let xpreset_source_type =
-				xpreset_source.length > 1 || isNaN(xpreset_source[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			let xpreset_dest = options.destination
+				isNaN(xpreset_source) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+			let xpreset_button_dest = options.destination
+			// Destination is an array even if there's just one item since we're using tags
+			let xpreset_dests = []
+			xpreset_button_dest.forEach(function (target) {
+				let xpreset_parsed_dest = self.parseTarget('destination', target)
+				if (xpreset_parsed_dest) { xpreset_dests.push(xpreset_parsed_dest) }
+			});
+			let xpreset_dest = (xpreset_dests.length > 1) ? xpreset_dests.join(',') : xpreset_dests[0]
 			let xpreset_dest_type =
 				xpreset_dest.length > 1 || isNaN(xpreset_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
-			xpreset_args.push(`D${xpreset_dest_type}{${xpreset_dest.join()}}`)
-			xpreset_args.push(`S${xpreset_source_type}{${xpreset_source.join()}}`)
-			xpreset_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+			let xpreset_dest_arg = `D${xpreset_dest_type}{${xpreset_dest}}`
+			let xpreset_src_arg = `S${xpreset_source_type}{${xpreset_source}}`
+			let xpreset_user_arg = `U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`
+			xpreset_args.push(xpreset_dest_arg, xpreset_src_arg, xpreset_user_arg)
+			if (xpreset_source_type !== xpreset_dest_type) {
+				this.log('warn', `Crosspoint Preset Source (${xpreset_src_arg}) and destination (${xpreset_dest_arg}) argument types don't match, this may result in unpredictable routing results`)
+			}
 
 			if (
 				!self.config.allow_empty_xpoint_dest &&
@@ -1085,7 +1206,6 @@ instance.prototype.action = function (action) {
 			lrc_type = self.LRC_CMD_TYPE_LOCK.id
 			lrc_op = self.LRC_OP_CHANGE_REQUEST.id
 			let lock_args = []
-			// let lock_dest_type = (options.destination.length > 1) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
 			let lock_dest_type = !isNaN(options.destination) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
 			lock_args.push(`D${lock_dest_type}{${options.destination.join()}}`)
 			lock_args.push(`V${self.LRC_ARG_TYPE_STRING}{${options.status}}`)
@@ -1146,6 +1266,10 @@ instance.prototype.action = function (action) {
 	}
 
 	if (lrc_type !== undefined && lrc_op !== undefined && lrc_args !== undefined) {
+		// Allow for specifying variables manually in button config
+		self.parseVariables(lrc_args, function(value) {
+			lrc_args = unescape(value);
+		})
 		self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 	} else {
 		self.log('error', 'Missing LRC command parameter')

@@ -18,6 +18,8 @@ All testing was performed against a Platinum IP3. Any router supporting the LRC 
    4. **User ID:** Numeric identifier for any commands requiring this parameter (e.g. `LOCK`, `PROTECT`, `XBUFFER`)
    5. **Salvo Count:** Number of salvos to query from the router (range from 0 to n) since the protocol doesn't provide a way to query them all programmatically
    6. **Allow Empty Crosspoint Destination:** Safeguard to prevent routing a single source to every destination in a single crosspoint command
+   7. **Crosspoint Format:** Sets sources/destinations used in crosspoint commands to be sent as either numbers (default) or names.
+      If you use a variable in the respective fields, you should set this to the same format as your variable values as the values will be sent unmodified.
 
 ## Actions
 
@@ -112,6 +114,14 @@ Destination lock state information is automatically updated by the router upon c
 
 Button colors can be changed in response to the state (protected/not-protected) of a given destination.
 Destination protect state information is automatically updated by the router upon change of protect state.
+
+## Presets
+
+### Salvos
+
+A preset is automatically created for each salvo provided by the router.
+Action is `Salvo Execution` for the given salvo.
+Feedback is `Salvo State` in green if the given salvo is active.
 
 ## Protocol Documentation
 
