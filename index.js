@@ -1,5 +1,6 @@
 var tcp = require('../../tcp')
 var instance_skel = require('../../instance_skel')
+const upgradeScripts = require('./upgrades')
 var debug
 var log
 
@@ -239,6 +240,7 @@ instance.prototype.init_tcp = function () {
 				// Update salvo list
 				let new_salvo_names = []
 				let upd_salvo_names = []
+
 				for (const match of salvo_name_matches) {
 					let existingSalvo = self.findTarget('salvo', match[1])
 					if (existingSalvo !== undefined) {
@@ -453,7 +455,8 @@ instance.prototype.config_fields = function () {
 			choices: [
 				{ id: 'numbers', label: 'Numbers' },
 				{ id: 'names', label: 'Names' },
-			]
+			],
+			required: true
 		}
 	]
 }
@@ -1053,8 +1056,11 @@ instance.prototype.parseTarget = function(target_type, target_name) {
 				target = found_target.id;
 			} else if (self.config.crosspoint_format === 'names') {
 				target = found_target.label;
+			} else if (self.config.crosspoint_format === undefined) {
+				self.log('error', "Crosspoint format not set in instance settings!")
+				return
 			} else {
-				self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
+				self.log('error', `Crosspoint format is invalid (${self.config.crosspoint_format}) in instance settings!`)
 				return
 			}
 		} else {
@@ -1274,6 +1280,13 @@ instance.prototype.action = function (action) {
 	} else {
 		self.log('error', 'Missing LRC command parameter')
 	}
+}
+
+instance.GetUpgradeScripts = function ()
+{
+	return [
+		upgradeScripts.upgrade_v1_1_1,
+	]
 }
 
 instance_skel.extendedBy(instance)
