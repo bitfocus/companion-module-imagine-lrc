@@ -1,28 +1,20 @@
 {
 	"name": "imagine-lrc",
-	"version": "1.1.0",
-	"description": "Companion module for controlling Imagine Communications video routers via Logical Router Control (LRC) protocol",
-	"keywords": [
-		"Imagine Communications",
-		"Logical Router Control",
-		"Video Router"
-	],
-	"manufacturer": "Imagine Communications",
-	"product": "Logical Router Control",
-	"shortname": "lrc",
-	"main": "index.js",
+	"version": "2.0.0",
+	"main": "src/main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "Ross Lindsay <ross@rosslindsay.com>",
 	"license": "MIT",
-	"homepage": "https://github.com/bitfocus/companion-module-imagine-lrc#readme",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-imagine-lrc/issues"
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-imagine-lrc.git"
 	},
-	"api_version": "1.0.0"
+	"packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
+	"dependencies": {
+		"@companion-module/base": "~1.8.0"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^1.5.1"
+	}
 }
