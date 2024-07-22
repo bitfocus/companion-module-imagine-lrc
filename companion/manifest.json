@@ -21,12 +21,6 @@
 		"entrypoint": "../src/main.js"
 	},
 	"manufacturer": "Imagine Communications",
-	"products": [
-		"Logical Router Control"
-	],
-	"keywords": [
-		"Imagine Communications",
-		"Logical Router Control",
-		"Video Router"
-	]
+	"products": ["Logical Router Control"],
+	"keywords": ["Imagine Communications", "Logical Router Control", "Video Router"]
 }
