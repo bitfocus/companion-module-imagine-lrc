@@ -3,20 +3,38 @@ const UpgradeScripts = require('./upgrades')
 const UpdateActions = require('./actions')
 const UpdateFeedbacks = require('./feedbacks')
 const UpdateVariableDefinitions = require('./variables')
+const GetConfigFields = require('./config')
+const utils = require('./utils')
 
 class ImagineLRCInstance extends InstanceBase {
     constructor(internal) {
         super(internal)
+        let self = this
+
+        // Assign the methods from the listed files to this class
+        Object.assign(self, {
+            ...GetConfigFields,
+            ...utils
+        })
+
+        this.state = {
+            'protocol_version': 0,
+            'sources': [],
+            'sources_count': 0,
+            'destinations': [],
+            'destinations_count': 0,
+            'channels': [],
+            'salvos': []
+        }
     }
 
     async init(config) {
         this.config = config
 
-        this.updateStatus(InstanceStatus.Ok)
-
-        this.updateActions() // export actions
-        this.updateFeedbacks() // export feedbacks
-        this.updateVariableDefinitions() // export variable definitions
+        this.initConnection()
+        this.updateActions()
+        this.updateFeedbacks()
+        this.updateVariableDefinitions()
     }
     // When module gets deleted
     async destroy() {
@@ -25,26 +43,7 @@ class ImagineLRCInstance extends InstanceBase {
 
     async configUpdated(config) {
         this.config = config
-    }
-
-    // Return config fields for web config
-    getConfigFields() {
-        return [
-            {
-                type: 'textinput',
-                id: 'host',
-                label: 'Target IP',
-                width: 8,
-                regex: Regex.IP,
-            },
-            {
-                type: 'textinput',
-                id: 'port',
-                label: 'Target Port',
-                width: 4,
-                regex: Regex.PORT,
-            },
-        ]
+        this.initConnection()
     }
 
     updateActions() {
@@ -60,4 +59,4 @@ class ImagineLRCInstance extends InstanceBase {
     }
 }
 
-runEntrypoint(ModuleInstance, UpgradeScripts)
+runEntrypoint(ImagineLRCInstance, UpgradeScripts)
