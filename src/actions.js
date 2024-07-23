@@ -107,6 +107,34 @@ module.exports = {
 			},
 		}
 
+		actions.xbuffer = {
+			name: 'Crosspoint Buffer Control',
+			description: 'Sends a XBUFFER command to the router with the specifid options',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Action',
+					id: 'action',
+					tooltip: 'Select an action',
+					minChoicesForSearch: 0,
+					choices: [
+						{ id: 'EXECUTE', label: 'Execute stored crosspoint commands' },
+						{ id: 'CLEAR', label: 'Clear command crosspoint buffer' },
+					],
+					default: 'EXECUTE',
+				},
+			],
+			callback: (action) => {
+				let lrc_type = self.LRC_CMD_TYPE_XBUFFER.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let xbuffer_args = []
+				xbuffer_args.push(`F${self.LRC_ARG_TYPE_STRING}{${action.options.action}}`)
+				xbuffer_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+				let lrc_args = xbuffer_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			}
+		}
+
 		self.setActionDefinitions(actions)
 	},
 }
