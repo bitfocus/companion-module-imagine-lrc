@@ -1,22 +1,9 @@
-module.exports = function (self) {
-	self.setActionDefinitions({
-		sample_action: {
-			name: 'My First Action',
-			options: [
-				{
-					id: 'num',
-					type: 'number',
-					label: 'Test',
-					default: 5,
-					min: 0,
-					max: 100,
-				},
-			],
-			callback: async (event) => {
-				console.log('Hello world!', event.options.num)
-			},
-		},
-		xpoint_take: {
+module.exports = {
+	initActions: function () {
+		let self = this
+		let actions = {}
+
+		actions.xpoint_take = {
 			name: 'Crosspoint Take',
 			description: 'Sends a XPOINT_TAKE command to the router with the specified options',
 			options: [
@@ -69,9 +56,64 @@ module.exports = function (self) {
 					default: undefined,
 				},
 			],
-			callback: async (event) => {
-				console.log('XPOINT_TAKE', event.options.num)
+			callback: async (action) => {
+				// ~XPOINT:S${SAT1.SD};D${MON6.SD}\
+				self.log('debug', 'XPOINT_TAKE was called with param ' + JSON.stringify(action))
+				let xpoint_args = []
+
+				let button_source = action.options.source
+				let source_level = action.options.source_level
+				let source = await self.parseTarget('source', button_source)
+				let source_type =
+					isNaN(source) || (source_level && isNaN(source_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+				self.log('debug', `XPOINT_TAKE Source: ${button_source}, ${source_level}, ${source}, ${source_type}`)
+
+				let button_dest = action.options.destination
+				let dest_level = action.options.destination_level
+				self.log('debug', 'XPOINT_TAKE button_dest: ' + JSON.stringify(button_dest))
+				// Destination is an array even if there's just one item since we're using tags
+				let dests = []
+				for (const target of button_dest) {
+					let parsed_target = await self.parseTarget('destination', target)
+					self.log('debug', `XPOINT_TAKE button_dest foreach parsed_target: ${parsed_target}`)
+					dests.push(parsed_target)
+				}
+
+				self.log('debug', 'XPOINT_TAKE Dests ' + JSON.stringify(dests))
+
+				let dest = dests.length > 1 ? dests.join(',') : dests[0]
+				let dest_type =
+					isNaN(dest) || (dest_level && isNaN(dest_level)) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+				self.log('debug', `XPOINT_TAKE Destination: ${button_dest}, ${dest_level}, ${dest}, ${dest_type}`)
+
+				let source_arg_value =
+					!source_level || source_level === undefined || source_level.length == 0 ? source : source + '.' + source_level
+				let dest_arg_value =
+					!dest_level || dest_level === undefined || dest_level.length == 0 ? dest : dest + '.' + dest_level
+				let source_arg = 'S' + source_type + '{' + source_arg_value + '}'
+				let dest_arg = 'D' + dest_type + '{' + dest_arg_value + '}'
+				xpoint_args.push(source_arg, dest_arg)
+				if (source_type !== dest_type) {
+					self.log(
+						'warn',
+						`Crosspoint Source (${source_arg}) and destination (${dest_arg}) argument types don't match, this may result in unpredictable routing results`
+					)
+				}
+
+				if (!self.config.allow_empty_xpoint_dest && (!dest || (Array.isArray(dest) && dest.length === 0))) {
+					// Safeguard to prevent routing the given source to every destination
+					// In Query (?) or Change (:) operations, an empty or missing destination list resolves to all logical destinations.
+					self.log('warn', 'Empty destination safeguard prevented crosspoint take for source ' + source)
+					return
+				}
+
+				let lrc_type = self.LRC_CMD_TYPE_XPOINT.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let lrc_args = xpoint_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 			},
-		},
-	})
+		}
+
+		self.setActionDefinitions(actions)
+	},
 }

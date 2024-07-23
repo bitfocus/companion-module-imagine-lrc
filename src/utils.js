@@ -89,11 +89,9 @@ module.exports = {
 			}
 			self.log('debug', 'Destinations Created: ' + new_dest_names.join(', '))
 			self.log('debug', 'Destinations Updated: ' + upd_dest_names.join(', '))
-			self.log('debug', 'Destinations Object: ' + JSON.stringify(self.state.destinations))
 
-			// TODO: Figure out what to replace this with
-			//self.saveConfig()
-			self.checkFeedbacks('xpoint_state')
+			// Re-initialize actions to populate the choices for destinations with the latest information
+			self.initActions()
 
 			// Query for locks and protects here because these must happen _after_ destinations are loaded into the config
 			self.sendLRCMessage(self.LRC_CMD_TYPE_LOCK.id, self.LRC_OP_QUERY.id)
@@ -147,9 +145,9 @@ module.exports = {
 				}
 				self.log('debug', 'Sources Created: ' + new_source_names.join(', '))
 				self.log('debug', 'Sources Updated: ' + upd_source_names.join(', '))
-				self.log('debug', 'Sources Object: ' + JSON.stringify(self.state.sources))
-				// TODO: Figure out what to replace this with
-				//self.saveConfig()
+
+				// Re-initialize actions to populate the choices for sources with the latest information
+				self.initActions()
 			}
 
 			const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
@@ -159,7 +157,6 @@ module.exports = {
 				let new_salvo_names = []
 				let upd_salvo_names = []
 				for (const match of salvo_name_matches) {
-					// TODO: Figure out what to replace this with
 					let existingSalvo = self.findTarget('salvo', match[1])
 					if (existingSalvo !== undefined) {
 						existingSalvo.label = match[1]
@@ -173,11 +170,11 @@ module.exports = {
 				}
 				self.log('debug', 'Salvos Created: ' + new_salvo_names.join(', '))
 				self.log('debug', 'Salvos Updated: ' + upd_salvo_names.join(', '))
-				self.log('debug', 'Salvos Object: ' + JSON.stringify(self.state.salvos))
-				// TODO: Figure out what to replace this with
-				//self.saveConfig()
+
+				// Re-initialize actions and presets to populate the choices for salvos with the latest information
+				self.initActions()
+				self.initPresets()
 				self.checkFeedbacks('salvo_state')
-				// self.init_presets()
 			}
 
 			const salvo_state_match = responseData.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
@@ -217,9 +214,9 @@ module.exports = {
 				}
 				self.log('debug', 'Channels Created: ' + new_chan_names.join(', '))
 				self.log('debug', 'Channels Updated: ' + upd_chan_names.join(', '))
-				self.log('debug', 'Channels Object: ' + JSON.stringify(self.state.channels))
-				// TODO: Figure out what to replace this with
-				// //self.saveConfig()
+
+				// Re-initialize actions to populate the choices for salvos with the latest information
+				self.initActions()
 			}
 
 			const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
@@ -302,6 +299,44 @@ module.exports = {
 				self.getData()
 			}
 		}
+	},
+
+	parseTarget: async function (target_type, target_name) {
+		let self = this
+		let parsed_target = ''
+		let target = ''
+		self.log('debug', `parseTarget: target_type: ${target_type}, target_name: ${target_name}`)
+
+		// Attempt to parse the provided target_name to translate any variables
+		await self.parseVariablesInString(target_name).then(function (value) {
+			parsed_target = unescape(value)
+		})
+		self.log('debug', `parseTarget: parsed_target: ${parsed_target}`)
+
+		// Check if parsed target is different from original target to try and determine
+		// if it was selected from the dropdown or set using a variable
+		if (parsed_target == target_name) {
+			// Parsed target is equal to button target, so variables weren't used.
+			// Translate button target to numbers or names depending on configuration
+			let found_target = self.findTarget(target_type, target_name)
+			if (found_target) {
+				if (self.config.crosspoint_format === 'numbers') {
+					target = found_target.id
+				} else if (self.config.crosspoint_format === 'names') {
+					target = found_target.label
+				} else {
+					self.log('error', `Unsupported crosspoint format: ${self.config.crosspoint_format}`)
+					return
+				}
+			} else {
+				self.log('error', `Could not find target ${target_type} for '${target_name}'`)
+			}
+		} else {
+			// Parsed source is NOT equal to button source, so variables were used.
+			// Send whatever was specified in the variable without any modification/translation
+			target = parsed_target
+		}
+		return target
 	},
 
 	findTarget: function (target_type, needle) {
