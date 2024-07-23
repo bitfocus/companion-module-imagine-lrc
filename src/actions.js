@@ -449,7 +449,7 @@ module.exports = {
 					label: 'Query Item',
 					id: 'query_item',
 					choices: self.LRC_CMD_TYPE_DEST_QUERIES,
-					default: 'COUNT'
+					default: 'COUNT',
 				},
 			],
 			callback: (action) => {
@@ -470,7 +470,7 @@ module.exports = {
 					label: 'Query Item',
 					id: 'query_item',
 					choices: self.LRC_CMD_TYPE_SOURCE_QUERIES,
-					default: 'COUNT'
+					default: 'COUNT',
 				},
 			],
 			callback: (action) => {
@@ -479,7 +479,7 @@ module.exports = {
 				let lrc_op = self.LRC_OP_QUERY.id
 				let lrc_args = `Q${self.LRC_ARG_TYPE_STRING}{${action.options.query_item}}`
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
-			}
+			},
 		}
 
 		actions.send_message = {
@@ -490,21 +490,21 @@ module.exports = {
 					label: 'Type',
 					id: 'type',
 					choices: self.LRC_CMD_TYPES,
-					default: 'XPOINT'
+					default: 'XPOINT',
 				},
 				{
 					type: 'dropdown',
 					label: 'Operation',
 					id: 'op',
 					choices: self.LRC_OPS,
-					default: ':'
+					default: ':',
 				},
 				{
 					type: 'textinput',
 					label: 'Arguments',
 					id: 'args',
 					tooltip: 'There is NO validation for this field.',
-					withVariables: true
+					withVariables: true,
 				},
 			],
 			callback: (action) => {
@@ -512,7 +512,7 @@ module.exports = {
 				let lrc_op = action.options.op
 				let lrc_args = action.options.args
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
-			}
+			},
 		}
 
 		actions.send_raw = {
@@ -523,12 +523,12 @@ module.exports = {
 					label: 'Message',
 					id: 'message',
 					tooltip: 'Only use this if you are absolutely sure of what you are doing. There is NO validation here.',
-					withVariables: true
-				}
+					withVariables: true,
+				},
 			],
 			callback: (action) => {
 				self.sendSocket(action.options.message)
-			}
+			},
 		}
 
 		self.setActionDefinitions(actions)
