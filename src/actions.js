@@ -359,6 +359,65 @@ module.exports = {
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 			},
 		}
+
+		actions.dest_protect = {
+			name: 'Destination Protect',
+			description: 'Sends a PROTECT command to the router with the specified options',
+			options: [
+				{
+					type: 'multidropdown',
+					label: 'Destination',
+					id: 'destination',
+					tooltip:
+						'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ' +
+						'Multiple destinations may be selected/entered if desired.' +
+						'*WARNING* An empty destination resolves to all logical destinations.',
+					minChoicesForSearch: 0,
+					allowCustom: true,
+					multiple: true,
+					regex: '/^[^~\\{},]+$/',
+					choices: self.state.destinations,
+					default: undefined,
+				},
+				{
+					type: 'dropdown',
+					label: 'Status',
+					id: 'status',
+					default: 'OFF',
+					tooltip: 'Specify the desired status of the protection',
+					choices: [
+						{ id: 'OFF', label: 'Not Protected (Off)' },
+						{ id: 'ON', label: 'Protected (On)' },
+					],
+					minChoicesForSearch: 0,
+				},
+				{
+					type: 'checkbox',
+					label: 'Override (Force Lock Status Change)',
+					id: 'override',
+					default: false,
+				},
+			],
+			callback: (action) => {
+				// ~PROTECT:D${MON6};V${ON};U#{20}\
+				let lrc_type = self.LRC_CMD_TYPE_PROTECT.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let protect_args = []
+				let protect_dest_type = !isNaN(action.options.destination)
+					? self.LRC_ARG_TYPE_NUMERIC
+					: self.LRC_ARG_TYPE_STRING
+				protect_args.push(`D${protect_dest_type}{${action.options.destination.join()}}`)
+				protect_args.push(`V${self.LRC_ARG_TYPE_STRING}{${action.options.status}}`)
+				if (action.options.override) {
+					// Undocumented User ID "-1" forces an override. The "O" parameter (apparently) does nothing
+					protect_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.LRC_CMD_TYPE_LOCK_OVERRIDE_USER}}`)
+				} else {
+					protect_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+				}
+				let lrc_args = protect_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			},
+		}
 		self.setActionDefinitions(actions)
 	},
 }
