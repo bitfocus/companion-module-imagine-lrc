@@ -132,7 +132,7 @@ module.exports = {
 				xbuffer_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
 				let lrc_args = xbuffer_args.join(';')
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
-			}
+			},
 		}
 
 		actions.xdisconnect = {
@@ -153,7 +153,7 @@ module.exports = {
 					regex: '/^[^~\\{},]+$/',
 					choices: self.state.destinations,
 					default: undefined,
-				}
+				},
 			],
 			callback: async (action) => {
 				// ~XDISCONNECT:D${ALLD 1}\
@@ -185,9 +185,83 @@ module.exports = {
 				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
 				let lrc_args = xdisc_args.join(';')
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
-			}
+			},
 		}
 
+		actions.xpreset = {
+			name: 'Crosspoint Preset',
+			description: 'Sends a XPRESET command to the router with the specified options',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Source',
+					id: 'source',
+					tooltip: 'Specify a source by name (e.g. "SAT 1") or number (e.g. 6)',
+					minChoicesForSearch: 0,
+					allowCustom: true,
+					regex: '/^[^~\\{},]+$/',
+					choices: self.state.sources,
+					default: undefined,
+				},
+				{
+					type: 'multidropdown',
+					label: 'Destination',
+					id: 'destination',
+					tooltip:
+						'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ' +
+						'Multiple destinations may be selected/entered if desired.' +
+						'*WARNING* An empty destination resolves to all logical destinations.',
+					minChoicesForSearch: 0,
+					allowCustom: true,
+					multiple: true,
+					regex: '/^[^~\\{},]+$/',
+					choices: self.state.destinations,
+					default: undefined,
+				},
+			],
+			callback: async (action) => {
+				// ~XPRESET:D#{2};S#{1};U#{1}\
+				let xpreset_args = []
+				let xpreset_source = await this.parseTarget('source', action.options.source)
+				let xpreset_source_type = isNaN(xpreset_source) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+
+				// Destination is an array even if there's just one item since we're using tags
+				let xpreset_dests = []
+				for (const target of action.options.destination) {
+					let parsed_target = await self.parseTarget('destination', target)
+					xpreset_dests.push(parsed_target)
+				}
+
+				let xpreset_dest = xpreset_dests.length > 1 ? xpreset_dests.join(',') : xpreset_dests[0]
+				let xpreset_dest_type =
+					xpreset_dest.length > 1 || isNaN(xpreset_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+				let xpreset_dest_arg = `D${xpreset_dest_type}{${xpreset_dest}}`
+				let xpreset_src_arg = `S${xpreset_source_type}{${xpreset_source}}`
+				let xpreset_user_arg = `U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`
+				xpreset_args.push(xpreset_dest_arg, xpreset_src_arg, xpreset_user_arg)
+				if (xpreset_source_type !== xpreset_dest_type) {
+					this.log(
+						'warn',
+						`Crosspoint Preset Source (${xpreset_src_arg}) and destination (${xpreset_dest_arg}) argument types don't match, this may result in unpredictable routing results`
+					)
+				}
+
+				if (
+					!self.config.allow_empty_xpoint_dest &&
+					(!xpreset_dest || (Array.isArray(xpreset_dest) && xpreset_dest.length === 0))
+				) {
+					// Safeguard to prevent routing the given source to every destination
+					// In Query (?) or Change (:) operations, an empty or missing destination list resolves to all logical destinations.
+					self.log('warn', 'Empty destination safeguard prevented crosspoint preset for source ' + xpreset_source)
+					return
+				}
+
+				let lrc_type = self.LRC_CMD_TYPE_XPRESET.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let lrc_args = xpreset_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			},
+		}
 		self.setActionDefinitions(actions)
 	},
 }
