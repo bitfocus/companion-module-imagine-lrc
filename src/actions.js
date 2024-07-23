@@ -262,6 +262,45 @@ module.exports = {
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 			},
 		}
+
+		actions.xsalvo = {
+			name: 'Salvo Execution',
+			description: 'Sends a XSALVO command to the router with the specified options',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Salvo',
+					id: 'salvo_id',
+					tooltip: 'Specify a salvo by name (e.g. "REST") or number (e.g. 6)',
+					minChoicesForSearch: 0,
+					allowCustom: true,
+					regex: '/^[^~\\{},]+$/',
+					choices: self.state.salvos,
+					default: undefined,
+				},
+				{
+					type: 'multidropdown',
+					label: 'Flags',
+					id: 'flags',
+					tooltip: 'Select all applicable flags',
+					choices: self.LRC_CMD_TYPE_XSALVO_FLAGS,
+					default: [],
+				},
+			],
+			callback: (action) => {
+				let lrc_type = self.LRC_CMD_TYPE_XSALVO.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let salvo_args = []
+				let id_type = !isNaN(action.options.salvo_id) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
+				salvo_args.push('ID' + id_type + '{' + action.options.salvo_id + '}')
+				if (action.options.hasOwnProperty('flags') && action.options.flags.length > 0) {
+					// F${FLAG,FLAG,FLAG}
+					salvo_args.push(`F${self.LRC_ARG_TYPE_STRING}{${action.options.flags.join()}}`)
+				}
+				let lrc_args = salvo_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			}
+		}
 		self.setActionDefinitions(actions)
 	},
 }
