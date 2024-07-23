@@ -5,7 +5,7 @@ module.exports = {
 
 		actions.xpoint_take = {
 			name: 'Crosspoint Take',
-			description: 'Sends a XPOINT_TAKE command to the router with the specified options',
+			description: 'Sends a XPOINT command to the router with the specified options',
 			options: [
 				{
 					type: 'dropdown',
@@ -263,7 +263,7 @@ module.exports = {
 			},
 		}
 
-		actions.xsalvo = {
+		actions.salvo_exec = {
 			name: 'Salvo Execution',
 			description: 'Sends a XSALVO command to the router with the specified options',
 			options: [
