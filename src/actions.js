@@ -135,6 +135,59 @@ module.exports = {
 			}
 		}
 
+		actions.xdisconnect = {
+			name: 'Crosspoint Disconnect',
+			description: 'Sends a XDISCONNECT command to the router with the specified options',
+			options: [
+				{
+					type: 'multidropdown',
+					label: 'Destination',
+					id: 'destination',
+					tooltip:
+						'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ' +
+						'Multiple destinations may be selected/entered if desired.' +
+						'*WARNING* An empty destination resolves to all logical destinations.',
+					minChoicesForSearch: 0,
+					allowCustom: true,
+					multiple: true,
+					regex: '/^[^~\\{},]+$/',
+					choices: self.state.destinations,
+					default: undefined,
+				}
+			],
+			callback: async (action) => {
+				// ~XDISCONNECT:D${ALLD 1}\
+				let xdisc_args = []
+
+				// Destination is an array even if there's just one item since we're using tags
+				let xdisc_dest = []
+				for (const target of action.options.destination) {
+					let parsed_target = await self.parseTarget('destination', target)
+					xdisc_dest.push(parsed_target)
+				}
+
+				let xdisc_dest_type =
+					xdisc_dest.length > 1 || isNaN(xdisc_dest[0]) ? self.LRC_ARG_TYPE_STRING : self.LRC_ARG_TYPE_NUMERIC
+				xdisc_args.push(`D${xdisc_dest_type}{${xdisc_dest.join()}}`)
+				xdisc_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+
+				if (
+					!self.config.allow_empty_xpoint_dest &&
+					(!xdisc_dest || (Array.isArray(xdisc_dest) && xdisc_dest.length === 0))
+				) {
+					// Safeguard to prevent routing the given source to every destination
+					// In Query (?) or Change (:) operations, an empty or missing destination list resolves to all logical destinations.
+					self.log('warn', 'Empty destination safeguard prevented crosspoint disconnect')
+					return
+				}
+
+				let lrc_type = self.LRC_CMD_TYPE_XDISCONNECT.id
+				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
+				let lrc_args = xdisc_args.join(';')
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			}
+		}
+
 		self.setActionDefinitions(actions)
 	},
 }
