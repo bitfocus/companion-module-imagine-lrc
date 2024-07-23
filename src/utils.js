@@ -1,70 +1,5 @@
 const { InstanceStatus, TCPHelper } = require('@companion-module/base')
 
-const LRC_OPENING_FLAG = '~'
-const LRC_CLOSING_FLAG = '\\'
-const LRC_CMD_TYPE_XPOINT = { id: 'XPOINT', label: 'Crosspoint Control' }
-const LRC_CMD_TYPE_LOCK = { id: 'LOCK', label: 'Destination Lock' }
-const LRC_CMD_TYPE_PROTECT = { id: 'PROTECT', label: 'Destination Protect' }
-const LRC_CMD_TYPE_CHANNELS = { id: 'CHANNELS', label: 'Logical Channel (Level)' }
-const LRC_CMD_TYPE_DEST = { id: 'DEST', label: 'Logical Destination' }
-const LRC_CMD_TYPE_SRC = { id: 'SRC', label: 'Logical Source' }
-const LRC_CMD_TYPE_DBCHANGE = { id: 'DBCHANGE', label: 'Database Change Notification' }
-const LRC_CMD_TYPE_CONNECTION = { id: 'CONNECTION', label: 'Connection (Session) Control' }
-const LRC_CMD_TYPE_PROTOCOL = { id: 'PROTOCOL', label: 'Protocol Information' }
-const LRC_CMD_TYPE_XBUFFER = { id: 'XBUFFER', label: 'Crosspoint Buffer Control' }
-const LRC_CMD_TYPE_XDISCONNECT = { id: 'XDISCONNECT', label: 'Disconnect Logical Crosspoint' }
-const LRC_CMD_TYPE_XPRESET = { id: 'XPRESET', label: 'Crosspoint Preset' }
-const LRC_CMD_TYPE_XSALVO = { id: 'XSALVO', label: 'Crosspoint Salvo' }
-const LRC_CMD_TYPES = [
-	LRC_CMD_TYPE_XPOINT,
-	LRC_CMD_TYPE_LOCK,
-	LRC_CMD_TYPE_PROTECT,
-	LRC_CMD_TYPE_CHANNELS,
-	LRC_CMD_TYPE_DEST,
-	LRC_CMD_TYPE_SRC,
-	LRC_CMD_TYPE_DBCHANGE,
-	LRC_CMD_TYPE_CONNECTION,
-	LRC_CMD_TYPE_PROTOCOL,
-	LRC_CMD_TYPE_XBUFFER,
-	LRC_CMD_TYPE_XDISCONNECT,
-	LRC_CMD_TYPE_XPRESET,
-	LRC_CMD_TYPE_XSALVO,
-]
-const LRC_OP_CHANGE_REQUEST = { id: ':', label: 'Change Request' }
-const LRC_OP_CHANGE_NOTIFICATION = { id: '!', label: 'Change Notification' }
-const LRC_OP_QUERY = { id: '?', label: 'Query' }
-const LRC_OP_QUERY_RESPONSE = { id: '%', label: 'Query Response' }
-const LRC_OPS = [LRC_OP_CHANGE_REQUEST, LRC_OP_QUERY]
-const LRC_ARG_TYPE_STRING = '$'
-const LRC_ARG_TYPE_NUMERIC = '#'
-const LRC_ARG_TYPE_UTF8 = '&'
-const LRC_ARG_TYPES = [LRC_ARG_TYPE_STRING, LRC_ARG_TYPE_NUMERIC, LRC_ARG_TYPE_UTF8]
-const LRC_CMD_TYPE_LOCK_OVERRIDE_USER = -1
-const LRC_CMD_TYPE_XSALVO_FLAGS = [
-	{ id: 'TAKE', label: 'Take salvo (default)' },
-	{ id: 'PRESET', label: 'Store salvo in the preset buffer' },
-	{ id: 'LOCK', label: 'Lock salvo crosspoints after execution' },
-	{ id: 'PROTECT', label: 'Protect salvo crosspoints after execution' },
-	{ id: 'UNLOCK', label: 'Unlock salvo crosspoints before execution' },
-	{ id: 'NOTAKE', label: 'Inhibit crosspoint take' },
-]
-const LRC_CMD_TYPE_PROTOCOL_QUERIES = [
-	{ id: 'NAME', label: 'Protocol Name' },
-	{ id: 'VERSION', label: 'Protocol Version' },
-]
-const LRC_CMD_TYPE_DEST_QUERIES = [
-	{ id: 'COUNT', label: 'Count of logical destinations in the system' },
-	{ id: 'NAME', label: 'Name of destination(s)' },
-	{ id: 'CHANNELS', label: 'List of valid channels' },
-	{ id: 'PHYSICAL', label: 'Physical location of a channel' },
-]
-const LRC_CMD_TYPE_SOURCE_QUERIES = [
-	{ id: 'COUNT', label: 'Count of logical sources in the system' },
-	{ id: 'NAME', label: 'Name of source(s)' },
-	{ id: 'CHANNELS', label: 'List of valid channels' },
-	{ id: 'PHYSICAL', label: 'Physical location of a channel' },
-]
-
 module.exports = {
 	initConnection: function () {
 		let self = this
@@ -102,22 +37,22 @@ module.exports = {
 		let self = this
 
 		// Protocol Details
-		self.sendLRCMessage(LRC_CMD_TYPE_PROTOCOL.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{NAME}`)
-		self.sendLRCMessage(LRC_CMD_TYPE_PROTOCOL.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{VERSION}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{VERSION}`)
 		// Destinations
-		self.sendLRCMessage(LRC_CMD_TYPE_DEST.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{COUNT}`)
-		self.sendLRCMessage(LRC_CMD_TYPE_DEST.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{NAME}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Sources
-		self.sendLRCMessage(LRC_CMD_TYPE_SRC.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{COUNT}`)
-		self.sendLRCMessage(LRC_CMD_TYPE_SRC.id, LRC_OP_QUERY.id, `Q${LRC_ARG_TYPE_STRING}{NAME}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Channels
-		self.sendLRCMessage(LRC_CMD_TYPE_CHANNELS.id, LRC_OP_QUERY.id)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_CHANNELS.id, self.LRC_OP_QUERY.id)
 		// Salvos
 		for (const i of [...Array(self.config.salvo_count + 1).keys()]) {
-			self.sendLRCMessage(LRC_CMD_TYPE_XSALVO.id, LRC_OP_QUERY.id, `ID${LRC_ARG_TYPE_NUMERIC}{${i}}`)
+			self.sendLRCMessage(self.LRC_CMD_TYPE_XSALVO.id, self.LRC_OP_QUERY.id, `ID${self.LRC_ARG_TYPE_NUMERIC}{${i}}`)
 		}
 		// Crosspoints
-		self.sendLRCMessage(LRC_CMD_TYPE_XPOINT.id, LRC_OP_QUERY.id)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_XPOINT.id, self.LRC_OP_QUERY.id)
 	},
 
 	processData: function (data) {
@@ -161,8 +96,8 @@ module.exports = {
 			self.checkFeedbacks('xpoint_state')
 
 			// Query for locks and protects here because these must happen _after_ destinations are loaded into the config
-			self.sendLRCMessage(LRC_CMD_TYPE_LOCK.id, LRC_OP_QUERY.id)
-			self.sendLRCMessage(LRC_CMD_TYPE_PROTECT.id, LRC_OP_QUERY.id)
+			self.sendLRCMessage(self.LRC_CMD_TYPE_LOCK.id, self.LRC_OP_QUERY.id)
+			self.sendLRCMessage(self.LRC_CMD_TYPE_PROTECT.id, self.LRC_OP_QUERY.id)
 
 			const xpoint_state_match = responseData.matchAll(/~XPOINT[!%]D[#$]{([^~\\{},]+)};S[$#]{([^~\\{},]+)}\\/g)
 			const xpoint_state_matches = [...xpoint_state_match]
@@ -400,10 +335,10 @@ module.exports = {
 		let self = this
 
 		let validation_errors = []
-		if (false === LRC_CMD_TYPES.find((o) => o.id === type)) {
+		if (false === self.LRC_CMD_TYPES.find((o) => o.id === type)) {
 			validation_errors.push(`Invalid LRC type "${type}"`)
 		}
-		if (false === LRC_OPS.find((o) => o.id === op)) {
+		if (false === self.LRC_OPS.find((o) => o.id === op)) {
 			validation_errors.push(`Invalid LRC operation "${op}"`)
 		}
 
@@ -412,9 +347,9 @@ module.exports = {
 			let message = ''
 			if (args === undefined) {
 				// Not all messages have arguments
-				message = LRC_OPENING_FLAG + type + op + LRC_CLOSING_FLAG
+				message = self.LRC_OPENING_FLAG + type + op + self.LRC_CLOSING_FLAG
 			} else {
-				message = LRC_OPENING_FLAG + type + op + args + LRC_CLOSING_FLAG
+				message = self.LRC_OPENING_FLAG + type + op + args + self.LRC_CLOSING_FLAG
 			}
 			self.sendSocket(message)
 		} else {

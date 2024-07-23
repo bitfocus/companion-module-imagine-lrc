@@ -14,6 +14,7 @@ class ImagineLRCInstance extends InstanceBase {
 		// Assign the methods from the listed files to this class
 		Object.assign(self, {
 			...GetConfigFields,
+			...constants,
 			...utils,
 		})
 
