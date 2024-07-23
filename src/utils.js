@@ -305,13 +305,11 @@ module.exports = {
 		let self = this
 		let parsed_target = ''
 		let target = ''
-		self.log('debug', `parseTarget: target_type: ${target_type}, target_name: ${target_name}`)
 
 		// Attempt to parse the provided target_name to translate any variables
 		await self.parseVariablesInString(target_name).then(function (value) {
 			parsed_target = unescape(value)
 		})
-		self.log('debug', `parseTarget: parsed_target: ${parsed_target}`)
 
 		// Check if parsed target is different from original target to try and determine
 		// if it was selected from the dropdown or set using a variable
