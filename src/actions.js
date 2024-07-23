@@ -418,6 +418,27 @@ module.exports = {
 				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
 			},
 		}
+
+		actions.protocol_query = {
+			name: 'Protocol Query',
+			description: 'Sends a PROTOCOL command to the router with the specified options',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Query Item',
+					id: 'query_item',
+					choices: self.LRC_CMD_TYPE_PROTOCOL_QUERIES,
+					default: 'NAME',
+				},
+			],
+			callback: (action) => {
+				// ~PROTOCOL?Q${NAME}\
+				let lrc_type = self.LRC_CMD_TYPE_PROTOCOL.id
+				let lrc_op = self.LRC_OP_QUERY.id
+				let lrc_args = `Q${self.LRC_ARG_TYPE_STRING}{${action.options.query_item}}`
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			}
+		}
 		self.setActionDefinitions(actions)
 	},
 }
