@@ -482,6 +482,55 @@ module.exports = {
 			}
 		}
 
+		actions.send_message = {
+			name: 'Send a manually-constructed LRC message',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Type',
+					id: 'type',
+					choices: self.LRC_CMD_TYPES,
+					default: 'XPOINT'
+				},
+				{
+					type: 'dropdown',
+					label: 'Operation',
+					id: 'op',
+					choices: self.LRC_OPS,
+					default: ':'
+				},
+				{
+					type: 'textinput',
+					label: 'Arguments',
+					id: 'args',
+					tooltip: 'There is NO validation for this field.',
+					withVariables: true
+				},
+			],
+			callback: (action) => {
+				let lrc_type = action.options.type
+				let lrc_op = action.options.op
+				let lrc_args = action.options.args
+				self.sendLRCMessage(lrc_type, lrc_op, lrc_args)
+			}
+		}
+
+		actions.send_raw = {
+			name: 'Send a raw message over the socket',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Message',
+					id: 'message',
+					tooltip: 'Only use this if you are absolutely sure of what you are doing. There is NO validation here.',
+					withVariables: true
+				}
+			],
+			callback: (action) => {
+				self.sendSocket(action.options.message)
+			}
+		}
+
 		self.setActionDefinitions(actions)
 	},
 }
