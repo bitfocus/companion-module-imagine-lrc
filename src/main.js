@@ -5,8 +5,7 @@ const constants = require('./constants')
 const utils = require('./utils')
 const actions = require('./actions')
 const presets = require('./presets')
-const UpdateFeedbacks = require('./feedbacks')
-const UpdateVariableDefinitions = require('./variables')
+const feedbacks = require('./feedbacks')
 
 class ImagineLRCInstance extends InstanceBase {
 	constructor(internal) {
@@ -20,6 +19,7 @@ class ImagineLRCInstance extends InstanceBase {
 			...utils,
 			...actions,
 			...presets,
+			...feedbacks
 		})
 
 		this.state = {
@@ -38,8 +38,7 @@ class ImagineLRCInstance extends InstanceBase {
 		this.initConnection()
 		this.initActions()
 		this.initPresets()
-		this.updateFeedbacks()
-		this.updateVariableDefinitions()
+		this.initFeedbacks()
 	}
 
 	// When module gets deleted
@@ -50,14 +49,6 @@ class ImagineLRCInstance extends InstanceBase {
 	async configUpdated(config) {
 		this.config = config
 		this.initConnection()
-	}
-
-	updateFeedbacks() {
-		UpdateFeedbacks(this)
-	}
-
-	updateVariableDefinitions() {
-		UpdateVariableDefinitions(this)
 	}
 }
 
