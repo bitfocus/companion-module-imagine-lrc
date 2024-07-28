@@ -31,7 +31,7 @@ module.exports = {
 				],
 				feedbacks: [
 					{
-						type: 'salvo_state',
+						feedbackId: 'salvo_state',
 						options: {
 							salvo: salvo.id,
 						},
