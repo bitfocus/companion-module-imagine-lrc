@@ -4,8 +4,8 @@ module.exports = {
 		let actions = {}
 
 		actions.xpoint_take = {
-			name: 'Crosspoint Take',
-			description: 'Sends a XPOINT command to the router with the specified options',
+			name: 'Crosspoint Take (XPOINT)',
+			description: 'Request a crosspoint take for specified source, destination(s), and level(s)/channel(s)',
 			options: [
 				{
 					type: 'dropdown',
@@ -108,8 +108,8 @@ module.exports = {
 		}
 
 		actions.xbuffer = {
-			name: 'Crosspoint Buffer Control',
-			description: 'Sends a XBUFFER command to the router with the specifid options',
+			name: 'Crosspoint Buffer Control (XBUFFER)',
+			description: 'Execute or clear crosspoint commands stored in the system buffer',
 			options: [
 				{
 					type: 'dropdown',
@@ -136,8 +136,8 @@ module.exports = {
 		}
 
 		actions.xdisconnect = {
-			name: 'Crosspoint Disconnect',
-			description: 'Sends a XDISCONNECT command to the router with the specified options',
+			name: 'Crosspoint Disconnect (XDISCONNECT)',
+			description: 'Disconnect logical crosspoints',
 			options: [
 				{
 					type: 'multidropdown',
@@ -189,8 +189,8 @@ module.exports = {
 		}
 
 		actions.xpreset = {
-			name: 'Crosspoint Preset',
-			description: 'Sends a XPRESET command to the router with the specified options',
+			name: 'Crosspoint Preset (XPRESET)',
+			description: 'Preset a crosspoint command in the system buffer',
 			options: [
 				{
 					type: 'dropdown',
@@ -264,8 +264,8 @@ module.exports = {
 		}
 
 		actions.salvo_exec = {
-			name: 'Salvo Execution',
-			description: 'Sends a XSALVO command to the router with the specified options',
+			name: 'Salvo Execution (XSALVO)',
+			description: 'Execute crosspoint salvos',
 			options: [
 				{
 					type: 'dropdown',
@@ -303,8 +303,8 @@ module.exports = {
 		}
 
 		actions.dest_lock = {
-			name: 'Destination Lock',
-			description: 'Sends a LOCK command to the router with the specified options',
+			name: 'Destination Lock (LOCK)',
+			description: 'Secure a destination from further crosspoint status changes by any user including the lock owner',
 			options: [
 				{
 					type: 'multidropdown',
@@ -361,8 +361,8 @@ module.exports = {
 		}
 
 		actions.dest_protect = {
-			name: 'Destination Protect',
-			description: 'Sends a PROTECT command to the router with the specified options',
+			name: 'Destination Protect (PROTECT)',
+			description: 'Secure a destination from further changes requested by anyone except the lock owner (user)',
 			options: [
 				{
 					type: 'multidropdown',
@@ -420,8 +420,8 @@ module.exports = {
 		}
 
 		actions.protocol_query = {
-			name: 'Protocol Query',
-			description: 'Sends a PROTOCOL command to the router with the specified options',
+			name: 'Protocol Query (PROTOCOL)',
+			description: 'Query protocol version information',
 			options: [
 				{
 					type: 'dropdown',
@@ -441,8 +441,8 @@ module.exports = {
 		}
 
 		actions.dest_query = {
-			name: 'Destination Query',
-			description: 'Sends a DEST command to the router with the specified options',
+			name: 'Destination Query (DEST)',
+			description: 'Query the system for the list of valid logical destinations',
 			options: [
 				{
 					type: 'dropdown',
@@ -462,8 +462,8 @@ module.exports = {
 		}
 
 		actions.source_query = {
-			name: 'Source Query',
-			description: 'Sends a SRC command to the router with the specified options',
+			name: 'Source Query (SRC)',
+			description: 'Query the system for information about valid logical sources',
 			options: [
 				{
 					type: 'dropdown',
