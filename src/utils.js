@@ -58,11 +58,13 @@ module.exports = {
 	processData: function (data) {
 		let self = this
 		let responseData = data.toString('utf8')
+		let knownData = false;
 		self.log('debug', `Received data: ${responseData}`)
 
 		const dest_count_match = responseData.matchAll(/~DEST%COUNT#{(\d+)}\\/g)
 		const dest_count_matches = [...dest_count_match]
 		if (dest_count_matches.length > 0) {
+			knownData = true;
 			// Update destination count
 			for (const match of dest_count_matches) {
 				self.state.destinations_count = match[1]
@@ -73,6 +75,7 @@ module.exports = {
 		const dest_name_match = responseData.matchAll(/~DEST%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
 		const dest_name_matches = [...dest_name_match]
 		if (dest_name_matches.length > 0) {
+			knownData = true;
 			// Update destination list
 			let new_dest_names = []
 			let upd_dest_names = []
@@ -96,208 +99,224 @@ module.exports = {
 			// Query for locks and protects here because these must happen _after_ destinations are loaded into the config
 			self.sendLRCMessage(self.LRC_CMD_TYPE_LOCK.id, self.LRC_OP_QUERY.id)
 			self.sendLRCMessage(self.LRC_CMD_TYPE_PROTECT.id, self.LRC_OP_QUERY.id)
+		}
 
-			const xpoint_state_match = responseData.matchAll(/~XPOINT[!%]D[#$]{([^~\\{},]+)};S[$#]{([^~\\{},]+)}\\/g)
-			const xpoint_state_matches = [...xpoint_state_match]
-			if (xpoint_state_matches.length > 0) {
-				// Update crosspoint state (for feedback)
-				let updated_dests = []
-				for (const match of xpoint_state_matches) {
-					let target = self.findTarget('destination', match[1])
-					if (target) {
-						target.source = match[2]
-						updated_dests.push(`${target.label}:${target.source}`)
-					} else {
-						self.log('debug', `Destination '${match[1]}' not found, can't update state`)
-					}
-				}
-				self.log('debug', 'Crosspoint State Updated: ' + updated_dests.join(', '))
-				self.checkFeedbacks('xpoint_state')
-			}
-
-			const source_count_match = responseData.matchAll(/~SRC%COUNT#{(\d+)}\\/g)
-			const source_count_matches = [...source_count_match]
-			if (source_count_matches.length > 0) {
-				// Update source count
-				for (const match of source_count_matches) {
-					self.state.sources_count = match[1]
-				}
-				self.log('debug', 'Source Count Updated: ' + self.state.sources_count)
-			}
-
-			const source_name_match = responseData.matchAll(/~SRC%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
-			const source_name_matches = [...source_name_match]
-			if (source_name_matches.length > 0) {
-				// Update source list
-				let new_source_names = []
-				let upd_source_names = []
-				for (const match of source_name_matches) {
-					let existingSource = self.findTarget('source', match[1])
-					if (existingSource !== undefined) {
-						existingSource.label = match[2]
-						existingSource.state = match[3]
-						upd_source_names.push(match[2])
-					} else {
-						const new_source = { id: match[1], label: match[2] }
-						self.state.sources.push(new_source)
-						new_source_names.push(match[2])
-					}
-				}
-				self.log('debug', 'Sources Created: ' + new_source_names.join(', '))
-				self.log('debug', 'Sources Updated: ' + upd_source_names.join(', '))
-
-				// Re-initialize actions to populate the choices for sources with the latest information
-				self.initActions()
-			}
-
-			const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
-			const salvo_name_matches = [...salvo_name_match]
-			if (salvo_name_matches.length > 0) {
-				// Update salvo list
-				let new_salvo_names = []
-				let upd_salvo_names = []
-				for (const match of salvo_name_matches) {
-					let existingSalvo = self.findTarget('salvo', match[1])
-					if (existingSalvo !== undefined) {
-						existingSalvo.label = match[1]
-						existingSalvo.state = match[2]
-						upd_salvo_names.push(match[1])
-					} else {
-						const new_salvo = { id: match[1], label: match[1], state: match[2] }
-						self.state.salvos.push(new_salvo)
-						new_salvo_names.push(match[1])
-					}
-				}
-				self.log('debug', 'Salvos Created: ' + new_salvo_names.join(', '))
-				self.log('debug', 'Salvos Updated: ' + upd_salvo_names.join(', '))
-
-				// Re-initialize actions and presets to populate the choices for salvos with the latest information
-				self.initActions()
-				self.initPresets()
-				self.checkFeedbacks('salvo_state')
-			}
-
-			const salvo_state_match = responseData.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
-			const salvo_state_matches = [...salvo_state_match]
-			if (salvo_state_matches.length > 0) {
-				// Update Salvo State (for feedback)
-				let updated_salvos = []
-				for (const match of salvo_state_matches) {
-					let target = self.state.salvos.find((salvo) => salvo.id === match[1])
-					if (target) {
-						target.state = match[2]
-						updated_salvos.push(`${target.label}:${target.state}`)
-					} else {
-						self.log('debug', `Salvo '${match[1]}' not found, can't update state`)
-					}
-				}
-				self.log('debug', 'Salvo State Updated: ' + updated_salvos.join(', '))
-				self.checkFeedbacks('salvo_state')
-			}
-
-			const channel_name_match = responseData.matchAll(/~CHANNELS%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
-			const channel_name_matches = [...channel_name_match]
-			if (channel_name_matches.length > 0) {
-				// Update channel list
-				let new_chan_names = []
-				let upd_chan_names = []
-				for (const match of channel_name_matches) {
-					let existingChan = self.findTarget('channel', match[1])
-					if (existingChan !== undefined) {
-						existingChan.label = match[1]
-						upd_chan_names.push(match[1])
-					} else {
-						const new_chan = { id: match[1], label: match[1] }
-						self.state.channels.push(new_chan)
-						new_chan_names.push(match[1])
-					}
-				}
-				self.log('debug', 'Channels Created: ' + new_chan_names.join(', '))
-				self.log('debug', 'Channels Updated: ' + upd_chan_names.join(', '))
-
-				// Re-initialize actions to populate the choices for salvos with the latest information
-				self.initActions()
-			}
-
-			const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
-			const lock_state_matches = [...lock_state_match]
-			if (lock_state_matches.length > 0) {
-				// Update destination lock state (for feedback)
-				let updated_dests = []
-				for (const match of lock_state_matches) {
-					let target = self.findTarget('destination', match[1])
-					if (target) {
-						target.lock = match[2]
-						updated_dests.push(`${target.label}:${target.lock}`)
-
-						if (match[2] === 'OFF') {
-							// Unlocking also un-protects, so update that too
-							target.protect = match[2]
-							self.checkFeedbacks('protect_state')
-						}
-					} else {
-						self.log('debug', `Destination '${match[1]}' not found, can't update lock state`)
-					}
-				}
-				self.log('debug', 'Destination Lock State Updated: ' + updated_dests.join(', '))
-				self.checkFeedbacks('lock_state')
-			}
-
-			const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
-			const protect_state_matches = [...protect_state_match]
-			if (protect_state_matches.length > 0) {
-				// Update destination protect state (for feedback)
-				let updated_dests = []
-				for (const match of protect_state_matches) {
-					let target = self.findTarget('destination', match[1])
-					if (target) {
-						target.protect = match[2]
-						updated_dests.push(`${target.label}:${target.protect}`)
-					} else {
-						self.log('debug', `Destination '${match[1]}' not found, can't update protect state`)
-					}
-				}
-				self.log('debug', 'Destination Protect State Updated: ' + updated_dests.join(', '))
-				self.checkFeedbacks('protect_state')
-			}
-
-			const protocol_name_match = responseData.matchAll(/~PROTOCOL%NAME\${([^~\\{},]+)}\\/g)
-			const protocol_name_matches = [...protocol_name_match]
-			if (protocol_name_matches.length > 0) {
-				// Update protocol name
-				let proto_name = undefined
-				for (const match of protocol_name_matches) {
-					proto_name = match[1]
-				}
-				self.log('debug', 'LRC Protocol Name: ' + proto_name)
-			}
-
-			const protocol_version_match = responseData.matchAll(/~PROTOCOL%VERSION\${([^~\\{},]+)}\\/g)
-			const protocol_version_matches = [...protocol_version_match]
-			if (protocol_version_matches.length > 0) {
-				// Update protocol version
-				let proto_ver = undefined
-				for (const match of protocol_version_matches) {
-					proto_ver = match[1]
-					self.state.protocol_version = match[1]
-				}
-				if (proto_ver === '1.0') {
-					self.log(
-						'warn',
-						`Connected to a router running old LRC version ${proto_ver}. Not all features may be supported!`
-					)
+		const xpoint_state_match = responseData.matchAll(/~XPOINT[!%]D[#$]{([^~\\{},]+)};S[$#]{([^~\\{},]+)}\\/g)
+		const xpoint_state_matches = [...xpoint_state_match]
+		if (xpoint_state_matches.length > 0) {
+			// Update crosspoint state (for feedback)
+			let updated_dests = []
+			for (const match of xpoint_state_matches) {
+				let target = self.findTarget('destination', match[1])
+				if (target) {
+					target.source = match[2]
+					updated_dests.push(`${target.label}:${target.source}`)
 				} else {
-					self.log('info', 'Connected to a router running LRC version ' + self.state.protocol_version)
+					self.log('debug', `Destination '${match[1]}' not found, can't update state`)
 				}
 			}
+			self.log('debug', 'Crosspoint State Updated: ' + updated_dests.join(', '))
+			self.checkFeedbacks('xpoint_state')
+		}
 
-			const db_change_match = responseData.matchAll(/~DBCHANGE!DATA\${ALL}\\/g)
-			const db_change_matches = [...db_change_match]
-			if (db_change_matches.length > 0) {
-				// Router database updated, need to update sources, destinations, and salvos
-				self.log('debug', 'Router database has changed, updating all locally-cached data')
-				self.getData()
+		const source_count_match = responseData.matchAll(/~SRC%COUNT#{(\d+)}\\/g)
+		const source_count_matches = [...source_count_match]
+		if (source_count_matches.length > 0) {
+			knownData = true;
+			// Update source count
+			for (const match of source_count_matches) {
+				self.state.sources_count = match[1]
 			}
+			self.log('debug', 'Source Count Updated: ' + self.state.sources_count)
+		}
+
+		const source_name_match = responseData.matchAll(/~SRC%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
+		const source_name_matches = [...source_name_match]
+		if (source_name_matches.length > 0) {
+			knownData = true;
+			// Update source list
+			let new_source_names = []
+			let upd_source_names = []
+			for (const match of source_name_matches) {
+				let existingSource = self.findTarget('source', match[1])
+				if (existingSource !== undefined) {
+					existingSource.label = match[2]
+					existingSource.state = match[3]
+					upd_source_names.push(match[2])
+				} else {
+					const new_source = { id: match[1], label: match[2] }
+					self.state.sources.push(new_source)
+					new_source_names.push(match[2])
+				}
+			}
+			self.log('debug', 'Sources Created: ' + new_source_names.join(', '))
+			self.log('debug', 'Sources Updated: ' + upd_source_names.join(', '))
+
+			// Re-initialize actions to populate the choices for sources with the latest information
+			self.initActions()
+		}
+
+		const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
+		const salvo_name_matches = [...salvo_name_match]
+		if (salvo_name_matches.length > 0) {
+			knownData = true;
+			// Update salvo list
+			let new_salvo_names = []
+			let upd_salvo_names = []
+			for (const match of salvo_name_matches) {
+				let existingSalvo = self.findTarget('salvo', match[1])
+				if (existingSalvo !== undefined) {
+					existingSalvo.label = match[1]
+					existingSalvo.state = match[2]
+					upd_salvo_names.push(match[1])
+				} else {
+					const new_salvo = { id: match[1], label: match[1], state: match[2] }
+					self.state.salvos.push(new_salvo)
+					new_salvo_names.push(match[1])
+				}
+			}
+			self.log('debug', 'Salvos Created: ' + new_salvo_names.join(', '))
+			self.log('debug', 'Salvos Updated: ' + upd_salvo_names.join(', '))
+
+			// Re-initialize all the things to populate the choices for salvos with the latest information
+			self.initActions()
+			self.initPresets()
+			self.initFeedbacks()
+			self.checkFeedbacks('salvo_state')
+		}
+
+		const salvo_state_match = responseData.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
+		const salvo_state_matches = [...salvo_state_match]
+		if (salvo_state_matches.length > 0) {
+			knownData = true;
+			// Update Salvo State (for feedback)
+			let updated_salvos = []
+			for (const match of salvo_state_matches) {
+				let target = self.state.salvos.find((salvo) => salvo.id === match[1])
+				if (target) {
+					target.state = match[2]
+					updated_salvos.push(`${target.label}:${target.state}`)
+				} else {
+					self.log('debug', `Salvo '${match[1]}' not found, can't update state`)
+				}
+			}
+			self.log('debug', 'Salvo State Updated: ' + updated_salvos.join(', '))
+			self.checkFeedbacks('salvo_state')
+		}
+
+		const channel_name_match = responseData.matchAll(/~CHANNELS%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
+		const channel_name_matches = [...channel_name_match]
+		if (channel_name_matches.length > 0) {
+			knownData = true;
+			// Update channel list
+			let new_chan_names = []
+			let upd_chan_names = []
+			for (const match of channel_name_matches) {
+				let existingChan = self.findTarget('channel', match[1])
+				if (existingChan !== undefined) {
+					existingChan.label = match[1]
+					upd_chan_names.push(match[1])
+				} else {
+					const new_chan = { id: match[1], label: match[1] }
+					self.state.channels.push(new_chan)
+					new_chan_names.push(match[1])
+				}
+			}
+			self.log('debug', 'Channels Created: ' + new_chan_names.join(', '))
+			self.log('debug', 'Channels Updated: ' + upd_chan_names.join(', '))
+
+			// Re-initialize actions to populate the choices for salvos with the latest information
+			self.initActions()
+		}
+
+		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const lock_state_matches = [...lock_state_match]
+		if (lock_state_matches.length > 0) {
+			knownData = true;
+			// Update destination lock state (for feedback)
+			let updated_dests = []
+			for (const match of lock_state_matches) {
+				let target = self.findTarget('destination', match[1])
+				if (target) {
+					target.lock = match[2]
+					updated_dests.push(`${target.label}:${target.lock}`)
+
+					if (match[2] === 'OFF') {
+						// Unlocking also un-protects, so update that too
+						target.protect = match[2]
+						self.checkFeedbacks('protect_state')
+					}
+				} else {
+					self.log('debug', `Destination '${match[1]}' not found, can't update lock state`)
+				}
+			}
+			self.log('debug', 'Destination Lock State Updated: ' + updated_dests.join(', '))
+			self.checkFeedbacks('lock_state')
+		}
+
+		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const protect_state_matches = [...protect_state_match]
+		if (protect_state_matches.length > 0) {
+			knownData = true;
+			// Update destination protect state (for feedback)
+			let updated_dests = []
+			for (const match of protect_state_matches) {
+				let target = self.findTarget('destination', match[1])
+				if (target) {
+					target.protect = match[2]
+					updated_dests.push(`${target.label}:${target.protect}`)
+				} else {
+					self.log('debug', `Destination '${match[1]}' not found, can't update protect state`)
+				}
+			}
+			self.log('debug', 'Destination Protect State Updated: ' + updated_dests.join(', '))
+			self.checkFeedbacks('protect_state')
+		}
+
+		const protocol_name_match = responseData.matchAll(/~PROTOCOL%NAME\${([^~\\{},]+)}\\/g)
+		const protocol_name_matches = [...protocol_name_match]
+		if (protocol_name_matches.length > 0) {
+			knownData = true;
+			// Update protocol name
+			let proto_name = undefined
+			for (const match of protocol_name_matches) {
+				proto_name = match[1]
+			}
+			self.log('debug', 'LRC Protocol Name: ' + proto_name)
+		}
+
+		const protocol_version_match = responseData.matchAll(/~PROTOCOL%VERSION\${([^~\\{},]+)}\\/g)
+		const protocol_version_matches = [...protocol_version_match]
+		if (protocol_version_matches.length > 0) {
+			knownData = true;
+			// Update protocol version
+			let proto_ver = undefined
+			for (const match of protocol_version_matches) {
+				proto_ver = match[1]
+				self.state.protocol_version = match[1]
+			}
+			if (proto_ver === '1.0') {
+				self.log(
+					'warn',
+					`Connected to a router running old LRC version ${proto_ver}. Not all features may be supported!`
+				)
+			} else {
+				self.log('info', 'Connected to a router running LRC version ' + self.state.protocol_version)
+			}
+		}
+
+		const db_change_match = responseData.matchAll(/~DBCHANGE!DATA\${ALL}\\/g)
+		const db_change_matches = [...db_change_match]
+		if (db_change_matches.length > 0) {
+			knownData = true;
+			// Router database updated, need to update sources, destinations, and salvos
+			self.log('debug', 'Router database has changed, updating all locally-cached data')
+			self.getData()
+		}
+
+		if (!knownData) {
+			// Message received that we don't know how to handle
+			self.log('debug', `Unknown data received: ${responseData}`)
 		}
 	},
 
