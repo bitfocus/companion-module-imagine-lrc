@@ -19,7 +19,7 @@ class ImagineLRCInstance extends InstanceBase {
 			...utils,
 			...actions,
 			...presets,
-			...feedbacks
+			...feedbacks,
 		})
 
 		this.state = {

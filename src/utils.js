@@ -58,13 +58,13 @@ module.exports = {
 	processData: function (data) {
 		let self = this
 		let responseData = data.toString('utf8')
-		let knownData = false;
+		let knownData = false
 		self.log('debug', `Received data: ${responseData}`)
 
 		const dest_count_match = responseData.matchAll(/~DEST%COUNT#{(\d+)}\\/g)
 		const dest_count_matches = [...dest_count_match]
 		if (dest_count_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update destination count
 			for (const match of dest_count_matches) {
 				self.state.destinations_count = match[1]
@@ -75,7 +75,7 @@ module.exports = {
 		const dest_name_match = responseData.matchAll(/~DEST%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
 		const dest_name_matches = [...dest_name_match]
 		if (dest_name_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update destination list
 			let new_dest_names = []
 			let upd_dest_names = []
@@ -122,7 +122,7 @@ module.exports = {
 		const source_count_match = responseData.matchAll(/~SRC%COUNT#{(\d+)}\\/g)
 		const source_count_matches = [...source_count_match]
 		if (source_count_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update source count
 			for (const match of source_count_matches) {
 				self.state.sources_count = match[1]
@@ -133,7 +133,7 @@ module.exports = {
 		const source_name_match = responseData.matchAll(/~SRC%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
 		const source_name_matches = [...source_name_match]
 		if (source_name_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update source list
 			let new_source_names = []
 			let upd_source_names = []
@@ -159,7 +159,7 @@ module.exports = {
 		const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
 		const salvo_name_matches = [...salvo_name_match]
 		if (salvo_name_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update salvo list
 			let new_salvo_names = []
 			let upd_salvo_names = []
@@ -188,7 +188,7 @@ module.exports = {
 		const salvo_state_match = responseData.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
 		const salvo_state_matches = [...salvo_state_match]
 		if (salvo_state_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update Salvo State (for feedback)
 			let updated_salvos = []
 			for (const match of salvo_state_matches) {
@@ -207,7 +207,7 @@ module.exports = {
 		const channel_name_match = responseData.matchAll(/~CHANNELS%I#{(\d+)};NAME\${([^~\\{},]+)}\\/g)
 		const channel_name_matches = [...channel_name_match]
 		if (channel_name_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update channel list
 			let new_chan_names = []
 			let upd_chan_names = []
@@ -232,7 +232,7 @@ module.exports = {
 		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
 		const lock_state_matches = [...lock_state_match]
 		if (lock_state_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update destination lock state (for feedback)
 			let updated_dests = []
 			for (const match of lock_state_matches) {
@@ -257,7 +257,7 @@ module.exports = {
 		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
 		const protect_state_matches = [...protect_state_match]
 		if (protect_state_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update destination protect state (for feedback)
 			let updated_dests = []
 			for (const match of protect_state_matches) {
@@ -276,7 +276,7 @@ module.exports = {
 		const protocol_name_match = responseData.matchAll(/~PROTOCOL%NAME\${([^~\\{},]+)}\\/g)
 		const protocol_name_matches = [...protocol_name_match]
 		if (protocol_name_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update protocol name
 			let proto_name = undefined
 			for (const match of protocol_name_matches) {
@@ -288,7 +288,7 @@ module.exports = {
 		const protocol_version_match = responseData.matchAll(/~PROTOCOL%VERSION\${([^~\\{},]+)}\\/g)
 		const protocol_version_matches = [...protocol_version_match]
 		if (protocol_version_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Update protocol version
 			let proto_ver = undefined
 			for (const match of protocol_version_matches) {
@@ -308,7 +308,7 @@ module.exports = {
 		const db_change_match = responseData.matchAll(/~DBCHANGE!DATA\${ALL}\\/g)
 		const db_change_matches = [...db_change_match]
 		if (db_change_matches.length > 0) {
-			knownData = true;
+			knownData = true
 			// Router database updated, need to update sources, destinations, and salvos
 			self.log('debug', 'Router database has changed, updating all locally-cached data')
 			self.getData()

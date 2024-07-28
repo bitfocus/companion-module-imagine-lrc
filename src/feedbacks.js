@@ -1,7 +1,7 @@
 const { combineRgb } = require('@companion-module/base')
 
 module.exports = {
-	initFeedbacks: function() {
+	initFeedbacks: function () {
 		let self = this
 		let feedbacks = {}
 
@@ -19,7 +19,7 @@ module.exports = {
 					type: 'dropdown',
 					label: 'Salvo',
 					choices: self.state.salvos,
-					default: ''
+					default: '',
 				},
 			],
 			callback: (feedback) => {
@@ -48,14 +48,14 @@ module.exports = {
 					type: 'dropdown',
 					label: 'Destination',
 					choices: self.state.destinations,
-					default: ''
+					default: '',
 				},
 				{
 					id: 'source',
 					type: 'dropdown',
 					label: 'Source',
 					choices: self.state.sources,
-					default: ''
+					default: '',
 				},
 			],
 			callback: (feedback) => {
@@ -67,7 +67,7 @@ module.exports = {
 					self.log('warn', `Destination '${xpoint_dest_id}' not found or no state property`)
 					return false
 				}
-			}
+			},
 		}
 
 		feedbacks['lock_state'] = {
@@ -84,7 +84,7 @@ module.exports = {
 					type: 'dropdown',
 					label: 'Destination',
 					choices: self.state.destinations,
-					default: ''
+					default: '',
 				},
 			],
 			callback: (feedback) => {
@@ -96,7 +96,7 @@ module.exports = {
 					self.log('warn', `Destination '${lock_dest_id}' not found or no lock property`)
 					return false
 				}
-			}
+			},
 		}
 
 		feedbacks['protect_state'] = {
@@ -113,7 +113,7 @@ module.exports = {
 					type: 'dropdown',
 					label: 'Destination',
 					choices: self.state.destinations,
-					default: ''
+					default: '',
 				},
 			],
 			callback: (feedback) => {
@@ -125,9 +125,9 @@ module.exports = {
 					self.log('warn', `Destination '${protect_dest_id}' not found or no protect property`)
 					return false
 				}
-			}
+			},
 		}
 
-		self.setFeedbackDefinitions(feedbacks);
-	}
+		self.setFeedbackDefinitions(feedbacks)
+	},
 }
