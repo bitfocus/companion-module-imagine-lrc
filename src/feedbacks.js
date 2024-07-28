@@ -25,7 +25,7 @@ module.exports = {
 			callback: (feedback) => {
 				let salvo_id = feedback.options.salvo
 				let salvo_target = self.findTarget('salvo', salvo_id)
-				if (salvo_target && salvo_target.hasOwnProperty('state')) {
+				if (salvo_target && Object.prototype.hasOwnProperty.call(salvo_target, 'state')) {
 					return salvo_target.state === 'ON'
 				} else {
 					self.log('warn', `Salvo '${salvo_id}' not found or no state property`)
@@ -61,7 +61,7 @@ module.exports = {
 			callback: (feedback) => {
 				let xpoint_dest_id = feedback.options.dest
 				let xpoint_dest_target = self.findTarget('destination', xpoint_dest_id)
-				if (xpoint_dest_target && xpoint_dest_target.hasOwnProperty('source')) {
+				if (xpoint_dest_target && Object.prototype.hasOwnProperty.call(xpoint_dest_target, 'source')) {
 					return xpoint_dest_target.source === feedback.options.source
 				} else {
 					self.log('warn', `Destination '${xpoint_dest_id}' not found or no state property`)
@@ -90,7 +90,7 @@ module.exports = {
 			callback: (feedback) => {
 				let lock_dest_id = feedback.options.dest
 				let lock_dest_target = self.findTarget('destination', lock_dest_id)
-				if (lock_dest_target && lock_dest_target.hasOwnProperty('lock')) {
+				if (lock_dest_target && Object.prototype.hasOwnProperty.call(lock_dest_target, 'lock')) {
 					return lock_dest_target.lock === 'ON'
 				} else {
 					self.log('warn', `Destination '${lock_dest_id}' not found or no lock property`)
@@ -119,7 +119,7 @@ module.exports = {
 			callback: (feedback) => {
 				let protect_dest_id = feedback.options.dest
 				let protect_dest_target = self.findTarget('destination', protect_dest_id)
-				if (protect_dest_target && protect_dest_target.hasOwnProperty('protect')) {
+				if (protect_dest_target && Object.prototype.hasOwnProperty.call(protect_dest_target, 'protect')) {
 					return protect_dest_target.protect === 'ON'
 				} else {
 					self.log('warn', `Destination '${protect_dest_id}' not found or no protect property`)
