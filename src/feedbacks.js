@@ -21,7 +21,7 @@ module.exports = {
 					choices: self.state.salvos,
 					default: '',
 					allowCustom: true,
-					useVariables: true
+					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
@@ -53,7 +53,7 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true
+					useVariables: true,
 				},
 				{
 					id: 'source',
@@ -62,7 +62,7 @@ module.exports = {
 					choices: self.state.sources,
 					default: '',
 					allowCustom: true,
-					useVariables: true
+					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
@@ -94,7 +94,7 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true
+					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
@@ -126,7 +126,7 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true
+					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
