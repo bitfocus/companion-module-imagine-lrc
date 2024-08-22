@@ -24,7 +24,7 @@ All testing was performed against a Platinum IP3. Any router supporting the LRC 
 ## Actions
 
 All commands available in the LRC protocol should be available here.
-Please see *Protocol Documentation* at the bottom of this document for a link to full documentation.
+Please see _Protocol Documentation_ at the bottom of this document for a link to full documentation.
 
 ### Crosspoint Take (XPOINT)
 
