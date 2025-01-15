@@ -179,7 +179,8 @@ module.exports = {
 			self.checkFeedbacks('salvo_state')
 		}
 
-		const salvo_state_match = responseData.matchAll(/~XSALVO!ID\${([^~\\{},]+)};V\${(ON|OFF)}\\/g)
+		//Line below corrected to also handle salvo numbers indicated by # and not just names indicated by $ . This code mirrors the above salvo_name_match command
+		const salvo_state_match = responseData.matchAll(/~XSALVO!ID[$#]{([^~\\{},]+)};V\${(ON|OFF)}\\/g)
 		const salvo_state_matches = [...salvo_state_match]
 		if (salvo_state_matches.length > 0) {
 			// Update Salvo State (for feedback)
