@@ -1,0 +1,41 @@
+name: Build and Package Module
+
+on:
+  # Trigger this workflow on pushes to main or any branch, and on pull requests
+  push:
+    branches:
+      - main
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use Node.js version 18 or adapt to your needs
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the module
+      - name: Build the module
+        run: npm run build
+
+      # Step 5: Upload the build artifacts
+      - name: Upload built module
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-module
+          path: dist/ # Replace with the actual build output folder if different
