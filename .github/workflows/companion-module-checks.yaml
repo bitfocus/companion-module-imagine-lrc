@@ -2,9 +2,7 @@ name: Companion Module Checks
 
 on:
   push:
-  workflow_dispatch:
-  #this enables manual trigger
-
+  
 jobs:
   check:
     name: Check module
@@ -16,5 +14,5 @@ jobs:
 
     uses: bitfocus/actions/.github/workflows/module-checks.yaml@main
     # with:
-       upload-artifact: true # uncomment this to upload the built package as an artifact to this workflow that you can download and share with others
+    #  upload-artifact: true # uncomment this to upload the built package as an artifact to this workflow that you can download and share with others
 
