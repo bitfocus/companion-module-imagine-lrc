@@ -292,7 +292,10 @@ module.exports = {
 				let lrc_op = self.LRC_OP_CHANGE_REQUEST.id
 				let salvo_args = []
 				let id_type = !isNaN(action.options.salvo_id) ? self.LRC_ARG_TYPE_NUMERIC : self.LRC_ARG_TYPE_STRING
-				salvo_args.push('ID' + id_type + '{' + action.options.salvo_id + '}')
+				salvo_args.push(`ID${id_type}{${action.options.salvo_id}}`)
+				if (self.config.send_user_id_with_xsalvo === true) {
+					salvo_args.push(`U${self.LRC_ARG_TYPE_NUMERIC}{${self.config.user_id}}`)
+				}
 				if (Object.prototype.hasOwnProperty.call(action.options, 'flags') && action.options.flags.length > 0) {
 					// F${FLAG,FLAG,FLAG}
 					salvo_args.push(`F${self.LRC_ARG_TYPE_STRING}{${action.options.flags.join()}}`)
