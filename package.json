@@ -1,6 +1,6 @@
 {
 	"name": "imagine-lrc",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"main": "src/main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
 	"dependencies": {
-		"@companion-module/base": "~1.11.0"
+		"@companion-module/base": "~1.12.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.5.1"
