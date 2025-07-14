@@ -109,7 +109,9 @@ module.exports = {
 			for (const match of xpoint_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
+					let sourceTarget = self.findTarget('source', match[2]);
 					target.source = match[2]
+					target.source_id = (sourceTarget.hasOwnProperty('id') ? sourceTarget.id : '0');
 					varsToUpdate.push(target);
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update state`)

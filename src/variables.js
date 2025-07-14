@@ -8,12 +8,15 @@ module.exports = {
         self.state.destinations.forEach((new_dest) => {
 
             const varID = (self.config['crosspoint_format'] === 'numbers') ?
-                `dest_${new_dest.id}_source` :
-                `dest__${new_dest.label.replaceAll(' ','_')}__source` ;
+                `output_${new_dest.id}_input` :
+                `output_${new_dest.label.replaceAll(' ','_')}_input` ;
 
             variables.push({
             	variableId: varID,
-            	name: `Dest Status: ${new_dest.label}`,
+            	name: `Dest '${new_dest.label}' Source Name`,
+            },{
+                variableId: varID + '_id',
+                name: `Dest '${new_dest.label}' Source ID`,
             });
         });
 
@@ -34,10 +37,11 @@ module.exports = {
         updated_dests.forEach((target) => {
 
             const varID = (self.config['crosspoint_format'] === 'numbers') ?
-                `dest_${target.id}_source` :
-                `dest__${target.label.replaceAll(' ','_')}__source` ;
+                `output_${target.id}_input` :
+                `output_${target.label.replaceAll(' ','_')}_input` ;
 
             variablesToUpdate[varID] = target.source;
+            variablesToUpdate[varID+'_id'] = target.source_id;
         });
 
         self.setVariableValues(variablesToUpdate)
