@@ -66,11 +66,13 @@ module.exports = {
 				},
 			],
 			callback: async (feedback, context) => {
-				let xpoint_dest_id = feedback.options.dest
-				const parsed_dest_id = await context.parseVariablesInString(xpoint_dest_id)
+				const parsed_dest_id = await context.parseVariablesInString(feedback.options['dest'])
+				const parsed_src_id = await context.parseVariablesInString(feedback.options['source'])
 				let xpoint_dest_target = self.findTarget('destination', parsed_dest_id)
-				if (xpoint_dest_target && Object.prototype.hasOwnProperty.call(xpoint_dest_target, 'source')) {
-					return xpoint_dest_target.source === feedback.options.source
+				let xpoint_src_target = self.findTarget('source', parsed_src_id);
+				if (!xpoint_dest_target || !xpoint_src_target) { return false; }
+				if (Object.prototype.hasOwnProperty.call(xpoint_dest_target, 'source')) {
+					return xpoint_dest_target.source === xpoint_src_target.id || xpoint_dest_target.source === xpoint_src_target.label;
 				} else {
 					self.log('warn', `Destination '${parsed_dest_id}' not found or no state property`)
 					return false

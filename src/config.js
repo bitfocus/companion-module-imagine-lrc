@@ -28,7 +28,7 @@ module.exports = {
 				max: 65535,
 				default: 0,
 				required: true,
-				tooltip: 'Numeric identifier for any commands requiring this parameter (e.g. LOCK, PROTECT, XBUFFER)',
+				tooltip: 'Numeric identifier for any commands requiring this parameter (e.g. LOCK, PROTECT, XBUFFER, XSALVO)',
 			},
 			{
 				type: 'number',
@@ -63,6 +63,16 @@ module.exports = {
 					'Sets sources/destinations used in crosspoint commands to be sent as either numbers (default)' +
 					' or names. If you use a variable in the respective fields, you should set this to the same format' +
 					' as your variable values as the values will be sent unmodified.',
+			},
+			{
+				type: 'checkbox',
+				id: 'send_user_id_with_xsalvo',
+				label: 'Send User ID with XSALVO Commands',
+				width: 6,
+				default: false,
+				tooltip: 'Some implementations of LRC require including a user ID with XSALVO commands. ' +
+									'Other implementations break entirely if the value is included. If you find that ' +
+									'your XSALVO commands are not working, you may need to enable this.'
 			},
 		]
 	},
