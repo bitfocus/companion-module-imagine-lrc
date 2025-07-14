@@ -39,12 +39,12 @@ module.exports = {
 		// Protocol Details
 		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{VERSION}`)
-		// Destinations
-		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
-		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Sources
 		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
 		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
+		// Destinations
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Channels
 		self.sendLRCMessage(self.LRC_CMD_TYPE_CHANNELS.id, self.LRC_OP_QUERY.id)
 		// Salvos
@@ -111,7 +111,7 @@ module.exports = {
 				if (target) {
 					let sourceTarget = self.findTarget('source', match[2]);
 					target.source = match[2]
-					target.source_id = (sourceTarget.hasOwnProperty('id') ? sourceTarget.id : '0');
+					target.source_id = ((sourceTarget && sourceTarget.hasOwnProperty('id')) ? sourceTarget.id : '0');
 					varsToUpdate.push(target);
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update state`)
