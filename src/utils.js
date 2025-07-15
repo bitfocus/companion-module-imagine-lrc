@@ -154,6 +154,9 @@ module.exports = {
 
 			// Re-initialize actions to populate the choices for sources with the latest information
 			self.initActions()
+
+			// Re-initialize the variables to make all possible destination statuses available
+			self.initVariables();
 		}
 
 		const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
