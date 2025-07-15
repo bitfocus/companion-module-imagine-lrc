@@ -39,12 +39,12 @@ module.exports = {
 		// Protocol Details
 		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		self.sendLRCMessage(self.LRC_CMD_TYPE_PROTOCOL.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{VERSION}`)
-		// Destinations
-		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
-		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Sources
 		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
 		self.sendLRCMessage(self.LRC_CMD_TYPE_SRC.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
+		// Destinations
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{COUNT}`)
+		self.sendLRCMessage(self.LRC_CMD_TYPE_DEST.id, self.LRC_OP_QUERY.id, `Q${self.LRC_ARG_TYPE_STRING}{NAME}`)
 		// Channels
 		self.sendLRCMessage(self.LRC_CMD_TYPE_CHANNELS.id, self.LRC_OP_QUERY.id)
 		// Salvos
@@ -93,6 +93,9 @@ module.exports = {
 			// Re-initialize actions to populate the choices for destinations with the latest information
 			self.initActions()
 
+			// Re-initialize the variables to make all possible destination statuses available
+			self.initVariables();
+
 			// Query for locks and protects here because these must happen _after_ destinations are loaded into the config
 			self.sendLRCMessage(self.LRC_CMD_TYPE_LOCK.id, self.LRC_OP_QUERY.id)
 			self.sendLRCMessage(self.LRC_CMD_TYPE_PROTECT.id, self.LRC_OP_QUERY.id)
@@ -102,17 +105,19 @@ module.exports = {
 		const xpoint_state_matches = [...xpoint_state_match]
 		if (xpoint_state_matches.length > 0) {
 			// Update crosspoint state (for feedback)
-			let updated_dests = []
+			let varsToUpdate = [];
 			for (const match of xpoint_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
+					let sourceTarget = self.findTarget('source', match[2]);
 					target.source = match[2]
-					updated_dests.push(`${target.label}:${target.source}`)
+					target.source_id = ((sourceTarget && sourceTarget.hasOwnProperty('id')) ? sourceTarget.id : '0');
+					varsToUpdate.push(target);
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update state`)
 				}
 			}
-			self.log('debug', 'Crosspoint State Updated: ' + updated_dests.join(', '))
+			self.updateVariables(varsToUpdate);
 			self.checkFeedbacks('xpoint_state')
 		}
 
@@ -149,6 +154,9 @@ module.exports = {
 
 			// Re-initialize actions to populate the choices for sources with the latest information
 			self.initActions()
+
+			// Re-initialize the variables to make all possible destination statuses available
+			self.initVariables();
 		}
 
 		const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
