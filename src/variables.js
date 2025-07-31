@@ -10,10 +10,10 @@ module.exports = {
 
             variables.push({
                 variableId: `input_${new_src.id}`,
-                name: `Source ${new_src.id} Name`,
+                name: `Input ${new_src.id} Name`,
             },{
                 variableId: `input_${new_src.label.replaceAll(' ','_')}_id`,
-                name: `Source ${new_src.label} ID`,
+                name: `Input ${new_src.label} ID`,
             });
 
             varVals[`input_${new_src.id}`] = new_src.label;
@@ -28,22 +28,22 @@ module.exports = {
             	name: `Dest ${new_dest.id} Name`,
             },{
             	variableId: `output_${new_dest.id}_input`,
-            	name: `Dest '${new_dest.label}' Source Name`,
+            	name: `Output '${new_dest.label}' Input Name`,
             },{
                 variableId: `output_${new_dest.id}_input_id`,
-                name: `Dest '${new_dest.label}' Source ID`,
+                name: `Output '${new_dest.label}' Input ID`,
             },{
                 variableId: `output_${new_dest.id}_lock_state`,
-                name: `Dest '${new_dest.label}' Lock/Protect State`,
+                name: `Output '${new_dest.label}' Input Lock/Protect State`,
             },{
             	variableId: `output_${new_dest.label.replaceAll(' ','_')}_input`,
-            	name: `Dest '${new_dest.label}' Source Name`,
+            	name: `Output '${new_dest.label}' Input Name`,
             },{
                 variableId: `output_${new_dest.label.replaceAll(' ','_')}_input_id`,
-                name: `Dest '${new_dest.label}' Source ID`,
+                name: `Output '${new_dest.label}' Input ID`,
             },{
                 variableId: `output_${new_dest.label.replaceAll(' ','_')}_lock_state`,
-                name: `Dest '${new_dest.label}' Lock/Protect State`,
+                name: `Output '${new_dest.label}' Lock/Protect State`,
             });
 
             varVals[`output_${new_dest.id}`] = new_dest.label;
