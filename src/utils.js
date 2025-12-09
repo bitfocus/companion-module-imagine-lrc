@@ -234,11 +234,13 @@ module.exports = {
 		if (lock_state_matches.length > 0) {
 			// Update destination lock state (for feedback)
 			let updated_dests = []
+			let varsToUpdate = []
 			for (const match of lock_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
 					target.lock = match[2]
 					updated_dests.push(`${target.label}:${target.lock}`)
+					varsToUpdate.push(target)
 
 					if (match[2] === 'OFF') {
 						// Unlocking also un-protects, so update that too
@@ -250,6 +252,9 @@ module.exports = {
 				}
 			}
 			self.log('debug', 'Destination Lock State Updated: ' + updated_dests.join(', '))
+			if (varsToUpdate.length > 0) {
+				self.updateVariables(varsToUpdate)
+			}
 			self.checkFeedbacks('lock_state')
 		}
 
@@ -258,16 +263,21 @@ module.exports = {
 		if (protect_state_matches.length > 0) {
 			// Update destination protect state (for feedback)
 			let updated_dests = []
+			let varsToUpdate = []
 			for (const match of protect_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
 					target.protect = match[2]
 					updated_dests.push(`${target.label}:${target.protect}`)
+					varsToUpdate.push(target)
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update protect state`)
 				}
 			}
 			self.log('debug', 'Destination Protect State Updated: ' + updated_dests.join(', '))
+			if (varsToUpdate.length > 0) {
+				self.updateVariables(varsToUpdate)
+			}
 			self.checkFeedbacks('protect_state')
 		}
 
