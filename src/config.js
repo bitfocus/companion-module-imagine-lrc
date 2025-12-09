@@ -70,9 +70,10 @@ module.exports = {
 				label: 'Send User ID with XSALVO Commands',
 				width: 6,
 				default: false,
-				tooltip: 'Some implementations of LRC require including a user ID with XSALVO commands. ' +
-									'Other implementations break entirely if the value is included. If you find that ' +
-									'your XSALVO commands are not working, you may need to enable this.'
+				tooltip:
+					'Some implementations of LRC require including a user ID with XSALVO commands. ' +
+					'Other implementations break entirely if the value is included. If you find that ' +
+					'your XSALVO commands are not working, you may need to enable this.',
 			},
 		]
 	},

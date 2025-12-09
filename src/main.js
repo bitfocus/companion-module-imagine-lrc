@@ -6,7 +6,7 @@ const utils = require('./utils')
 const actions = require('./actions')
 const presets = require('./presets')
 const feedbacks = require('./feedbacks')
-const variables = require('./variables');
+const variables = require('./variables')
 
 class ImagineLRCInstance extends InstanceBase {
 	constructor(internal) {
