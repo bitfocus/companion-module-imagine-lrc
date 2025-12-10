@@ -37,7 +37,7 @@ module.exports = {
 				},
 				{
 					variableId: `output_${new_dest.id}_lock_state`,
-					name: `Output '${new_dest.label}' Input Lock/Protect State`,
+					name: `Output '${new_dest.label}' Lock/Protect State`,
 				},
 				{
 					variableId: `output_${new_dest.label.replaceAll(' ', '_')}_input`,
@@ -69,14 +69,14 @@ module.exports = {
 		const variablesToUpdate = {}
 
 		updated_dests.forEach((target) => {
-			target.lock = target.lock === 'ON'
-			target.protect = target.protect === 'ON'
+			const lock_state = target.lock === 'ON' || target.protect === 'ON'
+
 			variablesToUpdate[`output_${target.id}_input`] = target.source
 			variablesToUpdate[`output_${target.id}_input_id`] = target.source_id
-			variablesToUpdate[`output_${target.id}_lock_state`] = target.lock || target.protect
+			variablesToUpdate[`output_${target.id}_lock_state`] = lock_state
 			variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input`] = target.source
 			variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input_id`] = target.source_id
-			variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = target.lock || target.protect
+			variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = lock_state
 		})
 
 		self.setVariableValues(variablesToUpdate)

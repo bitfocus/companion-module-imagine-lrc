@@ -108,7 +108,7 @@ module.exports = {
 				const parsed_lock_id = await context.parseVariablesInString(lock_dest_id)
 				let lock_dest_target = self.findTarget('destination', parsed_lock_id)
 				if (lock_dest_target && Object.prototype.hasOwnProperty.call(lock_dest_target, 'lock')) {
-					return lock_dest_target.lock === true
+					return lock_dest_target.lock === 'ON'
 				} else {
 					self.log('warn', `Destination '${parsed_lock_id}' not found or no lock property`)
 					return false
@@ -140,7 +140,7 @@ module.exports = {
 				const parsed_protect_id = await context.parseVariablesInString(protect_dest_id)
 				let protect_dest_target = self.findTarget('destination', parsed_protect_id)
 				if (protect_dest_target && Object.prototype.hasOwnProperty.call(protect_dest_target, 'protect')) {
-					return protect_dest_target.protect === true
+					return protect_dest_target.protect === 'ON'
 				} else {
 					self.log('warn', `Destination '${parsed_protect_id}' not found or no protect property`)
 					return false
