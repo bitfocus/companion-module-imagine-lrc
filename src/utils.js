@@ -229,7 +229,7 @@ module.exports = {
 			self.initActions()
 		}
 
-		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};(U#{\d+};)?V\${(ON|OFF)+}(;U#{(\d*)})?\\/g)
 		const lock_state_matches = [...lock_state_match]
 		if (lock_state_matches.length > 0) {
 			// Update destination lock state (for feedback)
@@ -238,13 +238,13 @@ module.exports = {
 			for (const match of lock_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
-					target.lock = match[2]
+					target.lock = match[3]
 					updated_dests.push(`${target.label}:${target.lock}`)
 					varsToUpdate.push(target)
 
 					if (match[2] === 'OFF') {
 						// Unlocking also un-protects, so update that too
-						target.protect = match[2]
+						target.protect = match[3]
 						self.checkFeedbacks('protect_state')
 					}
 				} else {
@@ -258,7 +258,7 @@ module.exports = {
 			self.checkFeedbacks('lock_state')
 		}
 
-		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};(U#{\d+};)?V\${(ON|OFF)+}(;U#{(\d*)})?\\/g)
 		const protect_state_matches = [...protect_state_match]
 		if (protect_state_matches.length > 0) {
 			// Update destination protect state (for feedback)
@@ -267,7 +267,7 @@ module.exports = {
 			for (const match of protect_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
-					target.protect = match[2]
+					target.protect = match[3]
 					updated_dests.push(`${target.label}:${target.protect}`)
 					varsToUpdate.push(target)
 				} else {
