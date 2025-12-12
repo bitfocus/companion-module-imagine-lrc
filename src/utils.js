@@ -94,7 +94,7 @@ module.exports = {
 			self.initActions()
 
 			// Re-initialize the variables to make all possible destination statuses available
-			self.initVariables();
+			self.initVariables()
 
 			// Query for locks and protects here because these must happen _after_ destinations are loaded into the config
 			self.sendLRCMessage(self.LRC_CMD_TYPE_LOCK.id, self.LRC_OP_QUERY.id)
@@ -105,19 +105,19 @@ module.exports = {
 		const xpoint_state_matches = [...xpoint_state_match]
 		if (xpoint_state_matches.length > 0) {
 			// Update crosspoint state (for feedback)
-			let varsToUpdate = [];
+			let varsToUpdate = []
 			for (const match of xpoint_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
-					let sourceTarget = self.findTarget('source', match[2]);
+					let sourceTarget = self.findTarget('source', match[2])
 					target.source = match[2]
-					target.source_id = ((sourceTarget && sourceTarget.hasOwnProperty('id')) ? sourceTarget.id : '0');
-					varsToUpdate.push(target);
+					target.source_id = sourceTarget && sourceTarget.hasOwnProperty('id') ? sourceTarget.id : '0'
+					varsToUpdate.push(target)
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update state`)
 				}
 			}
-			self.updateVariables(varsToUpdate);
+			self.updateVariables(varsToUpdate)
 			self.checkFeedbacks('xpoint_state')
 		}
 
@@ -156,7 +156,7 @@ module.exports = {
 			self.initActions()
 
 			// Re-initialize the variables to make all possible destination statuses available
-			self.initVariables();
+			self.initVariables()
 		}
 
 		const salvo_name_match = responseData.matchAll(/~XSALVO%ID[$#]{([^~\\{},]+)};V\${([ON|OF]+)}\\/g)
@@ -229,20 +229,22 @@ module.exports = {
 			self.initActions()
 		}
 
-		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};(U#{\d+};)?V\${(ON|OFF)+}(;U#{(\d*)})?\\/g)
 		const lock_state_matches = [...lock_state_match]
 		if (lock_state_matches.length > 0) {
 			// Update destination lock state (for feedback)
 			let updated_dests = []
+			let varsToUpdate = []
 			for (const match of lock_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
-					target.lock = match[2]
+					target.lock = match[3]
 					updated_dests.push(`${target.label}:${target.lock}`)
+					varsToUpdate.push(target)
 
 					if (match[2] === 'OFF') {
 						// Unlocking also un-protects, so update that too
-						target.protect = match[2]
+						target.protect = match[3]
 						self.checkFeedbacks('protect_state')
 					}
 				} else {
@@ -250,24 +252,32 @@ module.exports = {
 				}
 			}
 			self.log('debug', 'Destination Lock State Updated: ' + updated_dests.join(', '))
+			if (varsToUpdate.length > 0) {
+				self.updateVariables(varsToUpdate)
+			}
 			self.checkFeedbacks('lock_state')
 		}
 
-		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};V\${(ON|OFF)+};U#{(\d*)}\\/g)
+		const protect_state_match = responseData.matchAll(/~PROTECT[!%]D[#$]{([^~\\{},]+)};(U#{\d+};)?V\${(ON|OFF)+}(;U#{(\d*)})?\\/g)
 		const protect_state_matches = [...protect_state_match]
 		if (protect_state_matches.length > 0) {
 			// Update destination protect state (for feedback)
 			let updated_dests = []
+			let varsToUpdate = []
 			for (const match of protect_state_matches) {
 				let target = self.findTarget('destination', match[1])
 				if (target) {
-					target.protect = match[2]
+					target.protect = match[3]
 					updated_dests.push(`${target.label}:${target.protect}`)
+					varsToUpdate.push(target)
 				} else {
 					self.log('debug', `Destination '${match[1]}' not found, can't update protect state`)
 				}
 			}
 			self.log('debug', 'Destination Protect State Updated: ' + updated_dests.join(', '))
+			if (varsToUpdate.length > 0) {
+				self.updateVariables(varsToUpdate)
+			}
 			self.checkFeedbacks('protect_state')
 		}
 
