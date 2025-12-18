@@ -214,12 +214,12 @@ module.exports = {
 			for (const match of channel_name_matches) {
 				let existingChan = self.findTarget('channel', match[1])
 				if (existingChan !== undefined) {
-					existingChan.label = match[1]
-					upd_chan_names.push(match[1])
+					existingChan.label = match[2]
+					upd_chan_names.push(match[2])
 				} else {
-					const new_chan = { id: match[1], label: match[1] }
+					const new_chan = { id: match[1], label: match[2] }
 					self.state.channels.push(new_chan)
-					new_chan_names.push(match[1])
+					new_chan_names.push(match[2])
 				}
 			}
 			self.log('debug', 'Channels Created: ' + new_chan_names.join(', '))
@@ -227,6 +227,9 @@ module.exports = {
 
 			// Re-initialize actions to populate the choices for salvos with the latest information
 			self.initActions()
+
+			// Re-initialize the variables to publish the level name updates
+			self.initVariables()
 		}
 
 		const lock_state_match = responseData.matchAll(/~LOCK[!%]D[#$]{([^~\\{},]+)};(U#{\d+};)?V\${(ON|OFF)+}(;U#{(\d*)})?\\/g)
@@ -368,6 +371,9 @@ module.exports = {
 				break
 			case 'salvo':
 				haystack = self.state.salvos
+				break
+			case 'channel':
+				haystack = self.state.channels
 				break
 			default:
 				return false
