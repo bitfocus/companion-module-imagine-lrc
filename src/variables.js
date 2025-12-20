@@ -5,6 +5,15 @@ module.exports = {
 		const variables = []
 		const varVals = []
 
+		self.state.channels.forEach((channel) => {
+			variables.push({
+				variableId: `level_${channel.id}_name`,
+				name: `Level ${channel.id} Name`,
+			})
+
+			varVals[`level_${channel.id}_name`] = channel.label
+		})
+
 		self.state.sources.forEach((new_src) => {
 			variables.push(
 				{
