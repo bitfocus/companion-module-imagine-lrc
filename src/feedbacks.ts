@@ -1,16 +1,15 @@
-const { combineRgb } = require('@companion-module/base')
+import type { ModuleInstance } from './main.js'
+import { combineRgb } from '@companion-module/base'
+import { LRCEntityType } from './types.js'
 
-module.exports = {
-	initFeedbacks: function () {
-		let self = this
-		let feedbacks = {}
-
-		feedbacks['salvo_state'] = {
-			type: 'boolean',
+export function UpdateFeedbacks(self: ModuleInstance): void {
+	self.setFeedbackDefinitions({
+		salvo_state: {
 			name: 'Salvo State',
+			type: 'boolean',
 			description: 'If the crosspoints defined in the salvo are active, change the style of the button',
 			defaultStyle: {
-				bgColor: combineRgb(0, 255, 0),
+				bgcolor: combineRgb(0, 255, 0),
 				color: combineRgb(0, 0, 0),
 			},
 			options: [
@@ -21,13 +20,12 @@ module.exports = {
 					choices: self.state.salvos,
 					default: '',
 					allowCustom: true,
-					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
-				let salvo_id = feedback.options.salvo
-				const parsed_salvo_id = await context.parseVariablesInString(salvo_id)
-				let salvo_target = self.findTarget('salvo', parsed_salvo_id)
+				const salvo_id = feedback.options.salvo
+				const parsed_salvo_id = await context.parseVariablesInString(salvo_id + '')
+				const salvo_target = self.state.resolveTarget(LRCEntityType.XSALVO, parsed_salvo_id)
 				if (salvo_target && Object.prototype.hasOwnProperty.call(salvo_target, 'state')) {
 					return salvo_target.state === 'ON'
 				} else {
@@ -35,15 +33,14 @@ module.exports = {
 					return false
 				}
 			},
-		}
-
-		feedbacks['xpoint_state'] = {
-			type: 'boolean',
+		},
+		xpoint_state: {
 			name: 'Crosspoint State',
+			type: 'boolean',
 			description: 'If the specified crosspoint is active, change the style of the button',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
-				bgColor: combineRgb(0, 255, 0),
+				bgcolor: combineRgb(0, 255, 0),
 			},
 			options: [
 				{
@@ -53,7 +50,6 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true,
 				},
 				{
 					id: 'source',
@@ -62,35 +58,34 @@ module.exports = {
 					choices: self.state.sources,
 					default: '',
 					allowCustom: true,
-					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
-				const parsed_dest_id = await context.parseVariablesInString(feedback.options['dest'])
-				const parsed_src_id = await context.parseVariablesInString(feedback.options['source'])
-				let xpoint_dest_target = self.findTarget('destination', parsed_dest_id)
-				let xpoint_src_target = self.findTarget('source', parsed_src_id)
+				const parsed_dest_id = await context.parseVariablesInString(feedback.options['dest'] + '')
+				const parsed_src_id = await context.parseVariablesInString(feedback.options['source'] + '')
+				const xpoint_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_dest_id)
+				const xpoint_src_target = self.state.resolveTarget(LRCEntityType.SRC, parsed_src_id)
 				if (!xpoint_dest_target || !xpoint_src_target) {
 					return false
 				}
 				if (Object.prototype.hasOwnProperty.call(xpoint_dest_target, 'source')) {
 					return (
-						xpoint_dest_target.source === xpoint_src_target.id || xpoint_dest_target.source === xpoint_src_target.label
+						xpoint_dest_target.source.id === xpoint_src_target.id ||
+						xpoint_dest_target.source.label === xpoint_src_target.label
 					)
 				} else {
 					self.log('warn', `Destination '${parsed_dest_id}' not found or no state property`)
 					return false
 				}
 			},
-		}
-
-		feedbacks['lock_state'] = {
-			type: 'boolean',
+		},
+		lock_state: {
 			name: 'Destination Lock State',
+			type: 'boolean',
 			description: 'If the specified destination is locked, change the style of the button',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
-				bgColor: combineRgb(255, 0, 0),
+				bgcolor: combineRgb(255, 0, 0),
 			},
 			options: [
 				{
@@ -100,13 +95,12 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
-				let lock_dest_id = feedback.options.dest
-				const parsed_lock_id = await context.parseVariablesInString(lock_dest_id)
-				let lock_dest_target = self.findTarget('destination', parsed_lock_id)
+				const lock_dest_id = feedback.options.dest
+				const parsed_lock_id = await context.parseVariablesInString(lock_dest_id + '')
+				const lock_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_lock_id)
 				if (lock_dest_target && Object.prototype.hasOwnProperty.call(lock_dest_target, 'lock')) {
 					return lock_dest_target.lock === 'ON'
 				} else {
@@ -114,15 +108,14 @@ module.exports = {
 					return false
 				}
 			},
-		}
-
-		feedbacks['protect_state'] = {
-			type: 'boolean',
+		},
+		protect_state: {
 			name: 'Destination Protect State',
+			type: 'boolean',
 			description: 'If the specified destination is protected, change the style of the button',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
-				bgColor: combineRgb(255, 0, 0),
+				bgcolor: combineRgb(255, 0, 0),
 			},
 			options: [
 				{
@@ -132,13 +125,12 @@ module.exports = {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					useVariables: true,
 				},
 			],
 			callback: async (feedback, context) => {
-				let protect_dest_id = feedback.options.dest
-				const parsed_protect_id = await context.parseVariablesInString(protect_dest_id)
-				let protect_dest_target = self.findTarget('destination', parsed_protect_id)
+				const protect_dest_id = feedback.options.dest
+				const parsed_protect_id = await context.parseVariablesInString(protect_dest_id + '')
+				const protect_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_protect_id)
 				if (protect_dest_target && Object.prototype.hasOwnProperty.call(protect_dest_target, 'protect')) {
 					return protect_dest_target.protect === 'ON'
 				} else {
@@ -146,8 +138,6 @@ module.exports = {
 					return false
 				}
 			},
-		}
-
-		self.setFeedbackDefinitions(feedbacks)
-	},
+		},
+	})
 }
