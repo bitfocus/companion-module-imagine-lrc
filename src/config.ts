@@ -65,7 +65,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'crosspoint_format',
 			label: 'Crosspoint Format',
 			width: 6,
-			default: 'numbers',
+			default: CrosspointFormat.Names,
 			choices: [
 				{ id: CrosspointFormat.Numbers, label: 'Numbers' },
 				{ id: CrosspointFormat.Names, label: 'Names' },

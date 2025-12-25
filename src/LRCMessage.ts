@@ -1,4 +1,4 @@
-import { LRCArgument, LRCArgumentType, LRCEntityType, LRCOperation } from './types.js'
+import {LRCArgument, LRCArgumentType, LRCEntityType, LRCOperation, LRCOperationFromString} from './types.js'
 
 export class LRCMessage {
 	OPENING_FLAG = '~'
@@ -39,46 +39,42 @@ export class LRCMessage {
 
 		components.push(this.rawArgs, this.CLOSING_FLAG)
 
-		return components.join()
+		return components.join('')
 	}
 
 	static parseFromString(stringMessage: string): LRCMessage {
 		const tokenizer = stringMessage.matchAll(/~(\w+)([%:!?])((?:\w+[$#&]{[\w .,-]*})?(?:;\w+[$#&]{[\w .,-]*})*)\\/g)
-		const tokenizerMatches = [...tokenizer]
+		const tokenizerMatches = [...tokenizer][0]
 
 		if (!(<any>Object).values(LRCEntityType).includes(tokenizerMatches[1])) {
 			// Unsupported entity type
-			throw new Error(`Cant process LRC message - invalid entity type : ${stringMessage}`)
-		}
-
-		if (!(<any>Object).values(LRCOperation).includes(tokenizerMatches[2])) {
-			// Unsupported entity type
-			throw new Error(`Cant process LRC message - invalid entity type : ${stringMessage}`)
+			throw new Error(`Cant process LRC message - invalid entity type : ${tokenizerMatches[1]} from : ${stringMessage}`)
 		}
 
 		const newMessage = new this(
 			(<any>LRCEntityType)[tokenizerMatches[1].toString()],
-			(<any>LRCOperation)[tokenizerMatches[2].toString()],
+			LRCOperationFromString(tokenizerMatches[2]),
 		)
 
 		if (tokenizerMatches.length > 3) {
 			// Need to parse Argument List
 			const argumentList = tokenizerMatches[3].toString()
 
-			const argumentsMatcher = argumentList.matchAll(/(?:\w+[$#&]{[\w .,-]*})+/)
-			const argumentMatches = [...argumentsMatcher]
-
-			argumentMatches.forEach((arg) => {
-				const argCSplitter = arg.toString().matchAll(/(\w+)([$#&])({[\w .,-]*})/)
-				const argComponents = [...argCSplitter]
-				if (argComponents.length === 4) {
-					newMessage.addArgument(
-						argComponents[1].toString(),
-						(<any>LRCArgumentType)[argComponents[2].toString()],
-						argComponents[3].toString(),
-					)
-				}
-			})
+			const argumentsMatcher = argumentList.match(/(?:\w+[$#&]{[\w .,-]*})+/)
+			if (argumentsMatcher) {
+				argumentsMatcher.forEach((arg) => {
+					const argComponents = arg.toString().match(/(\w+)([$#&]){([\w .,-]*)}/)
+					if (argComponents) {
+						if (argComponents.length === 4) {
+							newMessage.addArgument(
+								argComponents[1].toString(),
+								(<any>LRCArgumentType)[argComponents[2].toString()],
+								argComponents[3].toString(),
+							)
+						}
+					}
+				})
+			}
 		}
 
 		return newMessage

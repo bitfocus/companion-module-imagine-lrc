@@ -13,17 +13,18 @@ export class LRCConnection {
 		this.moduleInstance = moduleInstance
 
 		moduleInstance.log('info', `Opening connection to ${host}:${port}`)
+		moduleInstance.updateStatus(InstanceStatus.UnknownWarning, 'Connection Pending')
 
 		this.socket = new TCPHelper(host, port)
 
 		this.socket.on('error', (err) => {
-			moduleInstance.log('warn', 'Error: ' + err)
+			moduleInstance.log('error', 'Connection Error: ' + err)
 
 			moduleInstance.updateStatus(InstanceStatus.ConnectionFailure)
 		})
 
 		this.socket.on('connect', () => {
-			moduleInstance.updateStatus(InstanceStatus.Ok)
+			moduleInstance.updateStatus(InstanceStatus.Ok, 'Connected')
 			moduleInstance.log('info', `Successfully connect to LRC Server`)
 			this.requestInitialData(moduleInstance.config.salvo_count)
 		})
@@ -33,6 +34,10 @@ export class LRCConnection {
 		})
 	}
 
+	destroy(): void {
+		this.socket?.destroy()
+	}
+
 	appendReceivedDataToQueue(data: Buffer): void {
 		this.dataQueue += data.toString()
 		this.processQueuedData()
@@ -40,8 +45,10 @@ export class LRCConnection {
 
 	processQueuedData(): void {
 		while (this.dataQueue.length) {
-			const messageSelector = this.dataQueue.match(/~\w+[%:!?](?:\w+[$#&]{.*})?(?:;\w+[$#&]{.*})*\\/)
+			const messageSelector = this.dataQueue.match(/~\w+[%:!?](?:\w+[$#&]{[^{}\\]*})?(?:;\w+[$#&]{[^{}\\]*})*\\/)
 			if (messageSelector) {
+				const len = messageSelector[0].length
+				this.dataQueue = this.dataQueue.slice(len)
 				try {
 					this.processReceivedMessage(LRCMessage.parseFromString(messageSelector[0]))
 				} catch (e) {
@@ -145,9 +152,11 @@ export class LRCConnection {
 				new LRCMessage(LRCEntityType.XSALVO, LRCOperation.QUERY).addArgument('ID', LRCArgumentType.NUMERIC, i),
 			)
 		}
+
 		// Crosspoints
 		messageQueue.push(new LRCMessage(LRCEntityType.XPOINT, LRCOperation.QUERY))
 
+		// Send Queue
 		messageQueue.forEach((message) => this.sendLRCMessage(message))
 	}
 }

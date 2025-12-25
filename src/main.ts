@@ -37,6 +37,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	async configUpdated(config: ModuleConfig): Promise<void> {
 		this.config = config
+		this.connection.destroy()
+		this.connection = new LRCConnection(this.config.host, this.config.port, this)
 	}
 
 	// Return config fields for web config

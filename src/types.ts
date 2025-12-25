@@ -68,6 +68,21 @@ export const LRCOperationLabels = [
 	{ id: '!', label: 'Change Notification' },
 ]
 
+export function LRCOperationFromString(string: string): LRCOperation {
+	switch (string) {
+		case '?':
+			return LRCOperation.QUERY
+		case '%':
+			return LRCOperation.QUERY_RESPONSE
+		case ':':
+			return LRCOperation.CHANGE_REQUEST
+		case '!':
+			return LRCOperation.CHANGE_NOTIFICATION
+	}
+
+	throw new Error('Unknown operation type')
+}
+
 export class LRCArgument {
 	field: string
 	type: LRCArgumentType
