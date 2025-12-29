@@ -111,18 +111,20 @@ export function UpdateActions(self: ModuleInstance): void {
 					self.config.crosspoint_format === CrosspointFormat.Numbers ? dest.id : dest.label,
 				)
 
+				let destsWithLevel
+
 				if (dest_level) {
-					destsParsed.map((dest) =>
-						self.config.crosspoint_format === CrosspointFormat.Numbers
+					destsWithLevel = destsParsed.map((dest) => {
+						return self.config.crosspoint_format === CrosspointFormat.Numbers
 							? `${dest}.${dest_level.id}`
-							: `${dest}.${dest_level.label}`,
-					)
+							: `${dest}.${dest_level.label}`
+					})
 				}
 
 				message.addArgument(
 					'D',
 					self.config.crosspoint_format === CrosspointFormat.Names ? LRCArgumentType.STRING : LRCArgumentType.NUMERIC,
-					destsParsed.join(','),
+					destsWithLevel ? destsWithLevel.join(',') : destsParsed.join(','),
 				)
 
 				self.connection.sendLRCMessage(message)
