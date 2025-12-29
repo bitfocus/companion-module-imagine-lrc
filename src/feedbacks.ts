@@ -23,6 +23,9 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				},
 			],
 			callback: async (feedback, context) => {
+				if (!self.connection.isConnected()) {
+					return false
+				}
 				const salvo_id = feedback.options.salvo
 				const parsed_salvo_id = await context.parseVariablesInString(salvo_id + '')
 				const salvo_target = self.state.resolveTarget(LRCEntityType.XSALVO, parsed_salvo_id)
@@ -61,6 +64,9 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				},
 			],
 			callback: async (feedback, context) => {
+				if (!self.connection.isConnected()) {
+					return false
+				}
 				const parsed_dest_id = await context.parseVariablesInString(feedback.options['dest'] + '')
 				const parsed_src_id = await context.parseVariablesInString(feedback.options['source'] + '')
 				const xpoint_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_dest_id)
@@ -74,7 +80,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 						xpoint_dest_target.source.label === xpoint_src_target.label
 					)
 				} else {
-					self.log('warn', `Destination '${parsed_dest_id}' not found or no state property`)
+					self.log('warn', `Destination '${parsed_dest_id}' not found or no source status present`)
 					return false
 				}
 			},
@@ -98,6 +104,9 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				},
 			],
 			callback: async (feedback, context) => {
+				if (!self.connection.isConnected()) {
+					return false
+				}
 				const lock_dest_id = feedback.options.dest
 				const parsed_lock_id = await context.parseVariablesInString(lock_dest_id + '')
 				const lock_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_lock_id)
@@ -128,6 +137,9 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				},
 			],
 			callback: async (feedback, context) => {
+				if (!self.connection.isConnected()) {
+					return false
+				}
 				const protect_dest_id = feedback.options.dest
 				const parsed_protect_id = await context.parseVariablesInString(protect_dest_id + '')
 				const protect_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_protect_id)

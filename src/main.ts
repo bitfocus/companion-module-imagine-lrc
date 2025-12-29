@@ -59,6 +59,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.reInitializeComponents()
 	}, 300)
 
+	evaluateFeedbacks = debounce(() => {
+		this.checkFeedbacks()
+	}, 300)
+
 	updateActions(): void {
 		UpdateActions(this)
 	}

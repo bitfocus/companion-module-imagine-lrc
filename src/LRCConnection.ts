@@ -42,6 +42,10 @@ export class LRCConnection {
 		this.socket?.destroy()
 	}
 
+	isConnected(): boolean {
+		return !!this.socket?.isConnected
+	}
+
 	appendReceivedDataToQueue(data: Buffer): void {
 		this.dataQueue += data.toString()
 	}
@@ -101,6 +105,7 @@ export class LRCConnection {
 
 			case LRCEntityType.XPOINT:
 				LRCHandlers.handleXpointUpdates(message, this.moduleInstance)
+				this.moduleInstance.evaluateFeedbacks()
 				break
 
 			default:
