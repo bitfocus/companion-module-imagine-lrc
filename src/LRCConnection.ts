@@ -92,6 +92,10 @@ export class LRCConnection {
 				LRCHandlers.handleSalvoUpdates(message, this.moduleInstance)
 				break
 
+			case LRCEntityType.CHANNELS:
+				LRCHandlers.handleChannelUpdates(message, this.moduleInstance)
+				break
+
 			case LRCEntityType.XPOINT:
 				LRCHandlers.handleXpointUpdates(message, this.moduleInstance)
 				break

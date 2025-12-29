@@ -1,6 +1,6 @@
 import { LRCMessage } from './LRCMessage.js'
 import { ModuleInstance } from './main.js'
-import { ImagineLRCDest, ImagineLRCSalvo, ImagineLRCSource, LRCEntityType } from './types.js'
+import { ImagineLRCChannel, ImagineLRCDest, ImagineLRCSalvo, ImagineLRCSource, LRCEntityType } from './types.js'
 
 export class LRCHandlers {
 	static handleProtocolUpdate(message: LRCMessage, module: ModuleInstance): void {
@@ -77,6 +77,22 @@ export class LRCHandlers {
 			})
 
 			module.log('debug', `Added Salvo: ${salvoID.value}`)
+		}
+	}
+
+	static handleChannelUpdates(message: LRCMessage, module: ModuleInstance): void {
+		const index = message.argument('I')
+		const name = message.argument('NAME')
+		if (index) {
+			const chan = module.state.resolveTarget(LRCEntityType.CHANNELS, index?.value)
+			if (chan) {
+				chan.label = `${name?.value}`
+			} else {
+				module.state.channels.push(<ImagineLRCChannel>{
+					id: index.value,
+					label: name?.value,
+				})
+			}
 		}
 	}
 
