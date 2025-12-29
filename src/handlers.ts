@@ -124,4 +124,30 @@ export class LRCHandlers {
 			}
 		}
 	}
+
+	static handleLockUpdates(message: LRCMessage, module: ModuleInstance): void {
+		const dest = message.argument('D')
+		const state = message.argument('V')
+		// const user = message.argument('U')
+
+		if (dest) {
+			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
+			if (existingDest) {
+				existingDest.lock = `${state?.value}`
+			}
+		}
+	}
+
+	static handleProtectUpdates(message: LRCMessage, module: ModuleInstance): void {
+		const dest = message.argument('D')
+		const state = message.argument('V')
+		// const user = message.argument('U')
+
+		if (dest) {
+			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
+			if (existingDest) {
+				existingDest.protect = `${state?.value}`
+			}
+		}
+	}
 }

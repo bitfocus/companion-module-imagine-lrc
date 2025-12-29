@@ -108,6 +108,16 @@ export class LRCConnection {
 				this.moduleInstance.evaluateFeedbacks()
 				break
 
+			case LRCEntityType.LOCK:
+				LRCHandlers.handleLockUpdates(message, this.moduleInstance)
+				this.moduleInstance.evaluateFeedbacks()
+				break
+
+			case LRCEntityType.PROTECT:
+				LRCHandlers.handleProtectUpdates(message, this.moduleInstance)
+				this.moduleInstance.evaluateFeedbacks()
+				break
+
 			default:
 				this.moduleInstance.log(
 					'debug',
@@ -179,6 +189,8 @@ export class LRCConnection {
 		messageQueue.push(
 			new LRCMessage(LRCEntityType.DEST, LRCOperation.QUERY).addArgument('Q', LRCArgumentType.STRING, 'COUNT'),
 			new LRCMessage(LRCEntityType.DEST, LRCOperation.QUERY).addArgument('Q', LRCArgumentType.STRING, 'NAME'),
+			new LRCMessage(LRCEntityType.LOCK, LRCOperation.QUERY),
+			new LRCMessage(LRCEntityType.PROTECT, LRCOperation.QUERY),
 		)
 
 		// Channels
