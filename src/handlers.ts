@@ -1,6 +1,13 @@
 import { LRCMessage } from './LRCMessage.js'
 import { ModuleInstance } from './main.js'
-import { ImagineLRCChannel, ImagineLRCDest, ImagineLRCSalvo, ImagineLRCSource, LRCEntityType } from './types.js'
+import {
+	ImagineLRCChannel,
+	ImagineLRCDest,
+	ImagineLRCSalvo,
+	ImagineLRCSource,
+	LRCArgumentType,
+	LRCEntityType,
+} from './types.js'
 
 export class LRCHandlers {
 	static handleProtocolUpdate(message: LRCMessage, module: ModuleInstance): void {
@@ -73,10 +80,13 @@ export class LRCHandlers {
 			const existingSalvo = module.state.resolveTarget(LRCEntityType.XSALVO, salvoID.value)
 			if (existingSalvo) {
 				existingSalvo.state = `${salvoStatus.value}`
+				if (salvoID.type === LRCArgumentType.STRING) {
+					existingSalvo.label = `${salvoID.value}`
+				}
 			} else {
 				module.state.salvos.push(<ImagineLRCSalvo>{
 					id: salvoID.value,
-					label: salvoID.value,
+					label: `Salvo ${salvoID.value}`,
 					state: `${salvoStatus.value}`,
 				})
 			}

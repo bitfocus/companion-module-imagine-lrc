@@ -133,6 +133,11 @@ export enum LRCConstants {
 	OVERRIDE_USER = -1,
 }
 
+/**
+ * Returns a debounced version of the provided callback
+ * @param callback Callable function to be debounced
+ * @param waitFor Duration in ms to wait until repeated calls have abated before executing callback
+ */
 export function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
 	callback: F,
 	waitFor: number,

@@ -48,6 +48,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 
 	reInitializeComponents(): void {
+		this.log('info', 'Reinitializing Actions, Variables, Presets, & Feedbacks after routing database update')
 		this.updateActions()
 		this.updateVariableDefinitions()
 		this.updatePresets()

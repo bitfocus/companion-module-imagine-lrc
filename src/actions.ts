@@ -301,7 +301,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'multidropdown',
 					label: 'Flags',
 					id: 'flags',
-					tooltip: 'Select all applicable flags',
+					tooltip: 'Select all applicable flags. If left empty, the system will execute a TAKE operation.',
 					choices: [
 						{ id: 'TAKE', label: 'Take salvo (default)' },
 						{ id: 'PRESET', label: 'Store salvo in the preset buffer' },
@@ -310,7 +310,7 @@ export function UpdateActions(self: ModuleInstance): void {
 						{ id: 'UNLOCK', label: 'Unlock salvo crosspoints before execution' },
 						{ id: 'NOTAKE', label: 'Inhibit crosspoint take' },
 					],
-					default: [],
+					default: ['TAKE'],
 				},
 			],
 			callback: (action) => {
