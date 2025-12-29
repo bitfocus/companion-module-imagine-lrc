@@ -1,7 +1,7 @@
 import { InstanceStatus, TCPHelper } from '@companion-module/base'
 import { ModuleInstance } from './main.js'
 import { LRCMessage } from './LRCMessage.js'
-import { LRCArgumentType, LRCEntityType, LRCOperation } from './types.js'
+import { debounce, LRCArgumentType, LRCEntityType, LRCOperation } from './types.js'
 import { LRCHandlers } from './handlers.js'
 
 export class LRCConnection {
@@ -19,8 +19,7 @@ export class LRCConnection {
 
 		this.socket.on('error', (err) => {
 			moduleInstance.log('error', 'Connection Error: ' + err)
-
-			moduleInstance.updateStatus(InstanceStatus.ConnectionFailure)
+			moduleInstance.updateStatus(InstanceStatus.ConnectionFailure, err.message)
 		})
 
 		this.socket.on('connect', () => {
@@ -31,7 +30,12 @@ export class LRCConnection {
 
 		this.socket.on('data', (buffer) => {
 			this.appendReceivedDataToQueue(buffer)
+			dataQueueHandler()
 		})
+
+		const dataQueueHandler = debounce(() => {
+			this.processQueuedData()
+		}, 300)
 	}
 
 	destroy(): void {
@@ -40,7 +44,6 @@ export class LRCConnection {
 
 	appendReceivedDataToQueue(data: Buffer): void {
 		this.dataQueue += data.toString()
-		this.processQueuedData()
 	}
 
 	processQueuedData(): void {
@@ -59,6 +62,13 @@ export class LRCConnection {
 	}
 
 	processReceivedMessage(message: LRCMessage): void {
+		if (!message.containsUpdate()) {
+			// Don't attempt to handle QUERY or CHANGE REQUEST messages inbound
+			return
+		}
+
+		let regenerate = false
+
 		switch (message.type) {
 			case LRCEntityType.DBCHANGE:
 				this.requestInitialData()
@@ -68,12 +78,22 @@ export class LRCConnection {
 				LRCHandlers.handleProtocolUpdate(message, this.moduleInstance)
 				break
 
+			case LRCEntityType.SRC:
+				LRCHandlers.handleSourceUpdates(message, this.moduleInstance)
+				regenerate = true
+				break
+
 			case LRCEntityType.DEST:
 				LRCHandlers.handleDestUpdates(message, this.moduleInstance)
+				regenerate = true
 				break
 
 			case LRCEntityType.XSALVO:
 				LRCHandlers.handleSalvoUpdates(message, this.moduleInstance)
+				break
+
+			case LRCEntityType.XPOINT:
+				LRCHandlers.handleXpointUpdates(message, this.moduleInstance)
 				break
 
 			default:
@@ -82,6 +102,10 @@ export class LRCConnection {
 					`Received LRC Message with no handler: ${message.type} : ${message.operation}.`,
 				)
 				break
+		}
+
+		if (regenerate) {
+			this.moduleInstance.reInitialize()
 		}
 	}
 

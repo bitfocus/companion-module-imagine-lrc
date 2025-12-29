@@ -111,6 +111,19 @@ export enum LRCArgumentType {
 	UTF8 = '&',
 }
 
+export function LRCArgumentTypeFromString(string: string): LRCArgumentType {
+	switch (string) {
+		case '$':
+			return LRCArgumentType.STRING
+		case '#':
+			return LRCArgumentType.NUMERIC
+		case '&':
+			return LRCArgumentType.UTF8
+	}
+
+	throw new Error('Unknown argument type')
+}
+
 export enum CrosspointFormat {
 	Names = 'Names',
 	Numbers = 'Numbers',
@@ -118,4 +131,15 @@ export enum CrosspointFormat {
 
 export enum LRCConstants {
 	OVERRIDE_USER = -1,
+}
+
+export function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
+	callback: F,
+	waitFor: number,
+): (...args: Parameters<F>) => void {
+	let timeout: NodeJS.Timeout
+	return (...args: Parameters<F>): void => {
+		clearTimeout(timeout)
+		timeout = setTimeout(() => callback(...args), waitFor)
+	}
 }

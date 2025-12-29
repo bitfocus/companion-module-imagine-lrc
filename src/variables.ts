@@ -1,10 +1,17 @@
 import type { ModuleInstance } from './main.js'
-import { ImagineLRCDest } from './types.js'
+import { debounce, ImagineLRCDest } from './types.js'
 import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
+
+const DestinationUpdateQueue: ImagineLRCDest[] = []
 
 export function UpdateVariableDefinitions(self: ModuleInstance): void {
 	const variables: CompanionVariableDefinition[] = []
 	const varVals: CompanionVariableValues = {}
+
+	variables.push(
+		{ variableId: 'protocol_name', name: 'Protocol Name' },
+		{ variableId: 'protocol_version', name: 'Protocol Version' },
+	)
 
 	self.state.channels.forEach((channel) => {
 		variables.push({
@@ -70,13 +77,23 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 
 	self.setVariableValues(varVals)
 
-	self.log('debug', `Published variables for ${variables.length} destinations.`)
+	self.log('debug', `Published variables for ${variables.length} objects.`)
 }
 
 export function UpdateVariables(self: ModuleInstance, updated_dests: ImagineLRCDest[] = []): void {
+	if (updated_dests) {
+		DestinationUpdateQueue.push(...updated_dests)
+	}
+
+	handleVariableUpdates(self)
+}
+
+const handleVariableUpdates = debounce(doVariableUpdates, 300)
+
+function doVariableUpdates(module: ModuleInstance): void {
 	const variablesToUpdate: CompanionVariableValues = {}
 
-	updated_dests.forEach((target: ImagineLRCDest) => {
+	DestinationUpdateQueue.forEach((target: ImagineLRCDest) => {
 		const lock_state = target.lock === 'ON' || target.protect === 'ON'
 
 		variablesToUpdate[`output_${target.id}_input`] = target.source.label
@@ -87,5 +104,5 @@ export function UpdateVariables(self: ModuleInstance, updated_dests: ImagineLRCD
 		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = lock_state
 	})
 
-	self.setVariableValues(variablesToUpdate)
+	module.setVariableValues(variablesToUpdate)
 }

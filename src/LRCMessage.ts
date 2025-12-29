@@ -1,4 +1,11 @@
-import {LRCArgument, LRCArgumentType, LRCEntityType, LRCOperation, LRCOperationFromString} from './types.js'
+import {
+	LRCArgument,
+	LRCArgumentType,
+	LRCArgumentTypeFromString,
+	LRCEntityType,
+	LRCOperation,
+	LRCOperationFromString,
+} from './types.js'
 
 export class LRCMessage {
 	OPENING_FLAG = '~'
@@ -8,6 +15,7 @@ export class LRCMessage {
 	operation: LRCOperation
 	arguments: LRCArgument[]
 	rawArgs: string
+	rawInput?: string
 
 	constructor(type: LRCEntityType, operation: LRCOperation) {
 		this.type = type
@@ -42,6 +50,10 @@ export class LRCMessage {
 		return components.join('')
 	}
 
+	containsUpdate(): boolean {
+		return this.operation === LRCOperation.QUERY_RESPONSE || this.operation === LRCOperation.CHANGE_NOTIFICATION
+	}
+
 	static parseFromString(stringMessage: string): LRCMessage {
 		const tokenizer = stringMessage.matchAll(/~(\w+)([%:!?])((?:\w+[$#&]{[\w .,-]*})?(?:;\w+[$#&]{[\w .,-]*})*)\\/g)
 		const tokenizerMatches = [...tokenizer][0]
@@ -56,25 +68,25 @@ export class LRCMessage {
 			LRCOperationFromString(tokenizerMatches[2]),
 		)
 
+		newMessage.rawInput = stringMessage
+
 		if (tokenizerMatches.length > 3) {
 			// Need to parse Argument List
 			const argumentList = tokenizerMatches[3].toString()
 
-			const argumentsMatcher = argumentList.match(/(?:\w+[$#&]{[\w .,-]*})+/)
-			if (argumentsMatcher) {
-				argumentsMatcher.forEach((arg) => {
-					const argComponents = arg.toString().match(/(\w+)([$#&]){([\w .,-]*)}/)
-					if (argComponents) {
-						if (argComponents.length === 4) {
-							newMessage.addArgument(
-								argComponents[1].toString(),
-								(<any>LRCArgumentType)[argComponents[2].toString()],
-								argComponents[3].toString(),
-							)
-						}
-					}
-				})
-			}
+			const argumentsMatcher = argumentList.matchAll(/(?:\w+[$#&]{[\w .,-]*})+/g)
+			const args = [...argumentsMatcher]
+
+			args.forEach((arg) => {
+				const argComponents = arg.toString().match(/(\w+)([$#&]){([\w .,-]*)}/)
+				if (argComponents && argComponents.length === 4) {
+					newMessage.addArgument(
+						argComponents[1].toString(),
+						LRCArgumentTypeFromString(argComponents[2]),
+						argComponents[3].toString(),
+					)
+				}
+			})
 		}
 
 		return newMessage

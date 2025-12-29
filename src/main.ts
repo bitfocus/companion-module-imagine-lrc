@@ -7,6 +7,7 @@ import { UpdateFeedbacks } from './feedbacks.js'
 import { GetPresets } from './presets.js'
 import { LRCState } from './LRCState.js'
 import { LRCConnection } from './LRCConnection.js'
+import { debounce } from './types.js'
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig // Setup in init()
@@ -45,6 +46,17 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	getConfigFields(): SomeCompanionConfigField[] {
 		return GetConfigFields()
 	}
+
+	reInitializeComponents(): void {
+		this.updateActions()
+		this.updateVariableDefinitions()
+		this.updatePresets()
+		this.updateFeedbacks()
+	}
+
+	reInitialize = debounce(() => {
+		this.reInitializeComponents()
+	}, 300)
 
 	updateActions(): void {
 		UpdateActions(this)
