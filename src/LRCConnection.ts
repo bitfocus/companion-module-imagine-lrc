@@ -35,7 +35,7 @@ export class LRCConnection {
 
 		const dataQueueHandler = debounce(() => {
 			this.processQueuedData()
-		}, 300)
+		}, 750)
 	}
 
 	destroy(): void {
