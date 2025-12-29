@@ -71,6 +71,7 @@ export class LRCConnection {
 
 		switch (message.type) {
 			case LRCEntityType.DBCHANGE:
+				this.moduleInstance.log('info', 'Received DBCHANGE notification...refreshing state data...')
 				this.requestInitialData()
 				break
 
@@ -90,10 +91,12 @@ export class LRCConnection {
 
 			case LRCEntityType.XSALVO:
 				LRCHandlers.handleSalvoUpdates(message, this.moduleInstance)
+				regenerate = true
 				break
 
 			case LRCEntityType.CHANNELS:
 				LRCHandlers.handleChannelUpdates(message, this.moduleInstance)
+				regenerate = true
 				break
 
 			case LRCEntityType.XPOINT:
@@ -150,6 +153,8 @@ export class LRCConnection {
 	}
 
 	requestInitialData(salvoCount?: number): void {
+		this.moduleInstance.log('debug', 'Requesting initial state data')
+
 		// Query router for various data to be cached locally for use in UI and within the module
 		const messageQueue = []
 

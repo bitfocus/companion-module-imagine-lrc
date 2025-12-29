@@ -70,13 +70,16 @@ export class LRCHandlers {
 		const salvoStatus = message.argument('V')
 
 		if (salvoID && salvoStatus) {
-			module.state.salvos.push(<ImagineLRCSalvo>{
-				id: salvoID.value,
-				label: salvoID.value,
-				state: salvoStatus.value,
-			})
-
-			module.log('debug', `Added Salvo: ${salvoID.value}`)
+			const existingSalvo = module.state.resolveTarget(LRCEntityType.XSALVO, salvoID.value)
+			if (existingSalvo) {
+				existingSalvo.state = `${salvoStatus.value}`
+			} else {
+				module.state.salvos.push(<ImagineLRCSalvo>{
+					id: salvoID.value,
+					label: salvoID.value,
+					state: `${salvoStatus.value}`,
+				})
+			}
 		}
 	}
 

@@ -22,6 +22,15 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 		varVals[`level_${channel.id}_name`] = channel.label
 	})
 
+	self.state.salvos.forEach((salvo) => {
+		variables.push({
+			variableId: `salvo_${salvo.id}_state`,
+			name: `Salvo ${salvo.id} Activation State`,
+		})
+
+		varVals[`salvo_${salvo.id}_state`] = salvo.state
+	})
+
 	self.state.sources.forEach((new_src) => {
 		variables.push(
 			{
