@@ -33,6 +33,7 @@ export class LRCHandlers {
 	static handleSourceUpdates(message: LRCMessage, module: ModuleInstance): void {
 		const count = message.argument('COUNT')
 		if (count) {
+			module.state.sources_count = parseInt(`${count.value}`, 10)
 			module.log('info', `Source Count Updated: ${count.value}`)
 		}
 
@@ -54,6 +55,7 @@ export class LRCHandlers {
 	static handleDestUpdates(message: LRCMessage, module: ModuleInstance): void {
 		const count = message.argument('COUNT')
 		if (count) {
+			module.state.destinations_count = parseInt(`${count.value}`, 10)
 			module.log('info', `Destination Count Updated: ${count.value}`)
 		}
 
