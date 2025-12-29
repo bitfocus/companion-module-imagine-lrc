@@ -1,8 +1,8 @@
 {
 	"name": "imagine-lrc",
-	"version": "2.3.0",
+	"version": "2.3.9-dev",
 	"type": "module",
-	"main": "src/main.js",
+	"main": "dist/main.js",
 	"scripts": {
 		"postinstall": "husky",
 		"format": "prettier -w .",
@@ -41,5 +41,5 @@
 			"yarn lint:raw --fix"
 		]
 	},
-	"packageManager": "yarn@4.9.1"
+	"packageManager": "yarn@4.12.0"
 }
