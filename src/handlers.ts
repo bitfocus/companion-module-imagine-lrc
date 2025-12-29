@@ -134,6 +134,7 @@ export class LRCHandlers {
 			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
 			if (existingDest) {
 				existingDest.lock = `${state?.value}`
+				module.updateVariables(module, [existingDest])
 			}
 		}
 	}
@@ -147,6 +148,7 @@ export class LRCHandlers {
 			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
 			if (existingDest) {
 				existingDest.protect = `${state?.value}`
+				module.updateVariables(module, [existingDest])
 			}
 		}
 	}

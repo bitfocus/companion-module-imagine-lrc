@@ -63,7 +63,11 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 			},
 			{
 				variableId: `output_${new_dest.id}_lock_state`,
-				name: `Output '${new_dest.label}' Lock/Protect State`,
+				name: `Output '${new_dest.label}' Lock State`,
+			},
+			{
+				variableId: `output_${new_dest.id}_protect_state`,
+				name: `Output '${new_dest.label}' Protect State`,
 			},
 			{
 				variableId: `output_${new_dest.label.replaceAll(' ', '_')}_input`,
@@ -75,7 +79,11 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 			},
 			{
 				variableId: `output_${new_dest.label.replaceAll(' ', '_')}_lock_state`,
-				name: `Output '${new_dest.label}' Lock/Protect State`,
+				name: `Output '${new_dest.label}' Lock State`,
+			},
+			{
+				variableId: `output_${new_dest.label.replaceAll(' ', '_')}_protect_state`,
+				name: `Output '${new_dest.label}' Protect State`,
 			},
 		)
 
@@ -103,14 +111,14 @@ function doVariableUpdates(module: ModuleInstance): void {
 	const variablesToUpdate: CompanionVariableValues = {}
 
 	DestinationUpdateQueue.forEach((target: ImagineLRCDest) => {
-		const lock_state = target.lock === 'ON' || target.protect === 'ON'
-
-		variablesToUpdate[`output_${target.id}_input`] = target.source.label
-		variablesToUpdate[`output_${target.id}_input_id`] = target.source.id
-		variablesToUpdate[`output_${target.id}_lock_state`] = lock_state
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input`] = target.source.label
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input_id`] = target.source.id
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = lock_state
+		variablesToUpdate[`output_${target.id}_input`] = target.source?.label
+		variablesToUpdate[`output_${target.id}_input_id`] = target.source?.id
+		variablesToUpdate[`output_${target.id}_lock_state`] = target.lock === 'ON'
+		variablesToUpdate[`output_${target.id}_protect_state`] = target.protect === 'ON'
+		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input`] = target.source?.label
+		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input_id`] = target.source?.id
+		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = target.lock === 'ON'
+		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_protect_state`] = target.protect === 'ON'
 	})
 
 	module.setVariableValues(variablesToUpdate)
