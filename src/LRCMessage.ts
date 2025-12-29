@@ -41,9 +41,7 @@ export class LRCMessage {
 	assemble(): string {
 		const components = [this.OPENING_FLAG, this.type, this.operation]
 
-		this.arguments.forEach((arg: LRCArgument) => {
-			components.push(arg.assemble())
-		})
+		components.push(this.arguments.map((arg) => arg.assemble()).join(';'))
 
 		components.push(this.rawArgs, this.CLOSING_FLAG)
 
