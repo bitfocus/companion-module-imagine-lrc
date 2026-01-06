@@ -490,7 +490,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: (action) => {
-				const message = new LRCMessage(LRCEntityType.PROTOCOL, LRCOperation.QUERY)
+				const message = new LRCMessage(LRCEntityType.DEST, LRCOperation.QUERY)
 				message.addArgument('Q', LRCArgumentType.STRING, `${action.options.query_item}`)
 				self.connection.sendLRCMessage(message)
 			},
