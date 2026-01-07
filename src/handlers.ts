@@ -98,15 +98,30 @@ export class LRCHandlers {
 	static handleChannelUpdates(message: LRCMessage, module: ModuleInstance): void {
 		const index = message.argument('I')
 		const name = message.argument('NAME')
-		if (index) {
-			const chan = module.state.resolveTarget(LRCEntityType.CHANNELS, index?.value)
-			if (chan) {
-				chan.label = `${name?.value}`
-			} else {
-				module.state.channels.push(<ImagineLRCChannel>{
-					id: index.value,
-					label: name?.value,
+		if (index && name) {
+			const indexVal = index.value.toString()
+			const nameVal = name.value.toString()
+
+			if (indexVal.includes(',') || nameVal.includes(',')) {
+				const indexVals = indexVal.split(',')
+				const nameVals = nameVal.split(',')
+
+				indexVals.forEach((index: string, i: number) => {
+					module.state.channels.push(<ImagineLRCChannel>{
+						id: parseInt(index, 10),
+						label: nameVals[i],
+					})
 				})
+			} else {
+				const chan = module.state.resolveTarget(LRCEntityType.CHANNELS, index?.value)
+				if (chan) {
+					chan.label = `${name?.value}`
+				} else {
+					module.state.channels.push(<ImagineLRCChannel>{
+						id: index.value,
+						label: name?.value,
+					})
+				}
 			}
 		}
 	}
