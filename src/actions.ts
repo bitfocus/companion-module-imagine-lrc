@@ -17,6 +17,13 @@ export function UpdateActions(self: ModuleInstance): void {
 			description: 'Request a crosspoint take for specified source, destination(s), and level(s)/channel(s)',
 			options: [
 				{
+					type: 'checkbox',
+					label: 'Use Variables?',
+					id: 'useVariables',
+					tooltip: 'Use variables to define targets instead of dropdowns/selections',
+					default: false,
+				},
+				{
 					type: 'dropdown',
 					label: 'Source',
 					id: 'source',
@@ -26,6 +33,17 @@ export function UpdateActions(self: ModuleInstance): void {
 					regex: '/^[^~\\{},]+$/',
 					choices: self.state.sources,
 					default: '',
+					isVisibleExpression: '!$(options:useVariables)',
+				},
+				{
+					type: 'textinput',
+					label: 'Source',
+					id: 'source_var',
+					tooltip: 'Specify a source by name (e.g. "SAT 1") or number (e.g. 6)',
+					regex: '/^[^~\\{},]+$/',
+					useVariables: true,
+					default: '',
+					isVisibleExpression: '$(options:useVariables)',
 				},
 				{
 					type: 'dropdown',
@@ -49,6 +67,16 @@ export function UpdateActions(self: ModuleInstance): void {
 					minChoicesForSearch: 0,
 					choices: self.state.destinations,
 					default: [],
+					isVisibleExpression: '!$(options:useVariables)',
+				},
+				{
+					id: 'destination_var',
+					type: 'textinput',
+					label: 'Destination',
+					tooltip: 'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ',
+					default: '',
+					useVariables: true,
+					isVisibleExpression: '$(options:useVariables)',
 				},
 				{
 					type: 'dropdown',
@@ -66,7 +94,10 @@ export function UpdateActions(self: ModuleInstance): void {
 				const message = new LRCMessage(LRCEntityType.XPOINT, LRCOperation.CHANGE_REQUEST)
 
 				// Source
-				const source = self.state.resolveTarget(LRCEntityType.SRC, `${action.options.source}`)
+				const source = self.state.resolveTarget(
+					LRCEntityType.SRC,
+					action.options.useVariables ? `${action.options.source_var}` : `${action.options.source}`,
+				)
 
 				if (!source) {
 					self.log('warn', "Couldn't resolve source from input provided.")
@@ -87,10 +118,17 @@ export function UpdateActions(self: ModuleInstance): void {
 
 				// Destination(s)
 				const dests = []
-				if (action.options.destination && Array.isArray(action.options.destination)) {
-					for (const target of action.options.destination) {
-						const parsed_target = self.state.resolveTarget(LRCEntityType.DEST, target)
-						dests.push(parsed_target)
+				if (action.options.useVariables) {
+					const parsedTarget = self.state.resolveTarget(LRCEntityType.DEST, `${action.options.destination_var}`)
+					if (parsedTarget) {
+						dests.push(parsedTarget)
+					}
+				} else {
+					if (action.options.destination && Array.isArray(action.options.destination)) {
+						for (const target of action.options.destination) {
+							const parsed_target = self.state.resolveTarget(LRCEntityType.DEST, target)
+							dests.push(parsed_target)
+						}
 					}
 				}
 

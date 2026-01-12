@@ -47,12 +47,11 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			},
 			options: [
 				{
-					id: 'dest',
-					type: 'dropdown',
-					label: 'Destination',
-					choices: self.state.destinations,
-					default: '',
-					allowCustom: true,
+					type: 'checkbox',
+					label: 'Use Variables?',
+					id: 'useVariables',
+					tooltip: 'Use variables to define targets instead of dropdowns/selections',
+					default: false,
 				},
 				{
 					id: 'source',
@@ -61,16 +60,52 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					choices: self.state.sources,
 					default: '',
 					allowCustom: true,
+					isVisibleExpression: '!$(options:useVariables)',
+				},
+				{
+					id: 'source_var',
+					type: 'textinput',
+					label: 'Source',
+					tooltip: 'Specify a source by name (e.g. "SAT 1") or number (e.g. 6)',
+					regex: '/^[^~\\{},]+$/',
+					useVariables: true,
+					default: '',
+					isVisibleExpression: '$(options:useVariables)',
+				},
+				{
+					id: 'dest',
+					type: 'dropdown',
+					label: 'Destination',
+					choices: self.state.destinations,
+					default: '',
+					allowCustom: true,
+					isVisibleExpression: '!$(options:useVariables)',
+				},
+				{
+					id: 'dest_var',
+					type: 'textinput',
+					label: 'Destination',
+					tooltip: 'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ',
+					default: '',
+					useVariables: true,
+					isVisibleExpression: '$(options:useVariables)',
 				},
 			],
 			callback: async (feedback, context) => {
 				if (!self.connection.isConnected()) {
 					return false
 				}
-				const parsed_dest_id = await context.parseVariablesInString(feedback.options['dest'] + '')
-				const parsed_src_id = await context.parseVariablesInString(feedback.options['source'] + '')
+
+				const parsed_dest_id = feedback.options.useVariables
+					? await context.parseVariablesInString(`${feedback.options.dest_var}`)
+					: `${feedback.options.dest}`
+				const parsed_src_id = feedback.options.useVariables
+					? await context.parseVariablesInString(`${feedback.options.source_var}`)
+					: `${feedback.options.source}`
+
 				const xpoint_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_dest_id)
 				const xpoint_src_target = self.state.resolveTarget(LRCEntityType.SRC, parsed_src_id)
+
 				if (!xpoint_dest_target || !xpoint_src_target) {
 					return false
 				}
