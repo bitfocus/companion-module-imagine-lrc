@@ -59,7 +59,10 @@ export class LRCConnection {
 				try {
 					this.processReceivedMessage(LRCMessage.parseFromString(messageSelector[0]))
 				} catch (e) {
-					this.moduleInstance.log('error', `Cant process received LRC message: ${e}`)
+					this.moduleInstance.log(
+						'error',
+						`Cant process received LRC message: ${e}. Message Input: ${messageSelector[0]}`,
+					)
 				}
 			}
 		}

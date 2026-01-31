@@ -53,7 +53,9 @@ export class LRCMessage {
 	}
 
 	static parseFromString(stringMessage: string): LRCMessage {
-		const tokenizer = stringMessage.matchAll(/~(\w+)([%:!?])((?:\w+[$#&]{[\w .,-]*})?(?:;\w+[$#&]{[\w .,-]*})*)\\/g)
+		const tokenizer = stringMessage.matchAll(
+			/~(\w+)([%:!?])((?:\w+[$#&]{[^{}\\~\r\n\t\f\v]*})?(?:;\w+[$#&]{[^{}\\~\r\n\t\f\v]*})*)\\/g,
+		)
 		const tokenizerMatches = [...tokenizer][0]
 
 		if (!(<any>Object).values(LRCEntityType).includes(tokenizerMatches[1])) {
