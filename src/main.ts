@@ -1,4 +1,10 @@
-import { InstanceBase, runEntrypoint, InstanceStatus, SomeCompanionConfigField } from '@companion-module/base'
+import {
+	InstanceBase,
+	runEntrypoint,
+	InstanceStatus,
+	SomeCompanionConfigField,
+	CompanionVariableValues,
+} from '@companion-module/base'
 import { GetConfigFields, type ModuleConfig } from './config.js'
 import { UpdateVariableDefinitions, UpdateVariables } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
@@ -13,9 +19,12 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig // Setup in init()
 	connection!: LRCConnection // Setup in init()
 	state: LRCState
+	variableStore: CompanionVariableValues
 
 	constructor(internal: unknown) {
 		super(internal)
+
+		this.variableStore = {}
 
 		this.state = new LRCState()
 	}
@@ -80,6 +89,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 
 	updateVariables = UpdateVariables
+
+	setVariableValues(values: CompanionVariableValues): void {
+		this.variableStore = {
+			...this.variableStore,
+			...values,
+		}
+		super.setVariableValues(this.variableStore)
+	}
 }
 
 runEntrypoint(ModuleInstance, UpgradeScripts)

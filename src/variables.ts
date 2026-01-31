@@ -111,14 +111,16 @@ function doVariableUpdates(module: ModuleInstance): void {
 	const variablesToUpdate: CompanionVariableValues = {}
 
 	DestinationUpdateQueue.forEach((target: ImagineLRCDest) => {
+		const labelNoSpace = target.label.replaceAll(' ', '_')
+
 		variablesToUpdate[`output_${target.id}_input`] = target.source?.label
 		variablesToUpdate[`output_${target.id}_input_id`] = target.source?.id
-		variablesToUpdate[`output_${target.id}_lock_state`] = target.lock === 'ON'
-		variablesToUpdate[`output_${target.id}_protect_state`] = target.protect === 'ON'
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input`] = target.source?.label
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_input_id`] = target.source?.id
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_lock_state`] = target.lock === 'ON'
-		variablesToUpdate[`output_${target.label.replaceAll(' ', '_')}_protect_state`] = target.protect === 'ON'
+		variablesToUpdate[`output_${target.id}_lock_state`] = target.lock
+		variablesToUpdate[`output_${target.id}_protect_state`] = target.protect
+		variablesToUpdate[`output_${labelNoSpace}_input`] = target.source?.label
+		variablesToUpdate[`output_${labelNoSpace}_input_id`] = target.source?.id
+		variablesToUpdate[`output_${labelNoSpace}_lock_state`] = target.lock
+		variablesToUpdate[`output_${labelNoSpace}_protect_state`] = target.protect
 	})
 
 	module.setVariableValues(variablesToUpdate)

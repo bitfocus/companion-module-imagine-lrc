@@ -69,6 +69,8 @@ export class LRCHandlers {
 				module.state.destinations.push(<ImagineLRCDest>{
 					id: id.value,
 					label: name ? name.value : '',
+					lock: 'OFF',
+					protect: 'OFF',
 				})
 			}
 		}
@@ -145,12 +147,16 @@ export class LRCHandlers {
 	static handleLockUpdates(message: LRCMessage, module: ModuleInstance): void {
 		const dest = message.argument('D')
 		const state = message.argument('V')
-		// const user = message.argument('U')
+		const user = message.argument('U')
 
 		if (dest) {
 			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
-			if (existingDest) {
-				existingDest.lock = `${state?.value}`
+			if (existingDest && state) {
+				let userString = ''
+				if (state.value === 'ON' && user) {
+					userString = ` (User ID: ${user.value})`
+				}
+				existingDest.lock = `${state.value}${userString}`
 				module.updateVariables(module, [existingDest])
 			}
 		}
@@ -159,12 +165,16 @@ export class LRCHandlers {
 	static handleProtectUpdates(message: LRCMessage, module: ModuleInstance): void {
 		const dest = message.argument('D')
 		const state = message.argument('V')
-		// const user = message.argument('U')
+		const user = message.argument('U')
 
 		if (dest) {
 			const existingDest = module.state.resolveTarget(LRCEntityType.DEST, dest.value)
-			if (existingDest) {
-				existingDest.protect = `${state?.value}`
+			if (existingDest && state) {
+				let userString = ''
+				if (state.value === 'ON' && user) {
+					userString = ` (User ID: ${user.value})`
+				}
+				existingDest.protect = `${state.value}${userString}`
 				module.updateVariables(module, [existingDest])
 			}
 		}

@@ -145,8 +145,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				const lock_dest_id = feedback.options.dest
 				const parsed_lock_id = await context.parseVariablesInString(lock_dest_id + '')
 				const lock_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_lock_id)
-				if (lock_dest_target && Object.prototype.hasOwnProperty.call(lock_dest_target, 'lock')) {
-					return lock_dest_target.lock === 'ON'
+				if (lock_dest_target && lock_dest_target.lock) {
+					return lock_dest_target.lock.includes('ON')
 				} else {
 					self.log('warn', `Destination '${parsed_lock_id}' not found or no lock property`)
 					return false
@@ -178,8 +178,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				const protect_dest_id = feedback.options.dest
 				const parsed_protect_id = await context.parseVariablesInString(protect_dest_id + '')
 				const protect_dest_target = self.state.resolveTarget(LRCEntityType.DEST, parsed_protect_id)
-				if (protect_dest_target && Object.prototype.hasOwnProperty.call(protect_dest_target, 'protect')) {
-					return protect_dest_target.protect === 'ON'
+				if (protect_dest_target && protect_dest_target.protect) {
+					return protect_dest_target.protect.includes('ON')
 				} else {
 					self.log('warn', `Destination '${parsed_protect_id}' not found or no protect property`)
 					return false
