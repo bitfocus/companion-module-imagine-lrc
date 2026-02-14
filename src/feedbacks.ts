@@ -47,30 +47,12 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			},
 			options: [
 				{
-					type: 'checkbox',
-					label: 'Use Variables?',
-					id: 'useVariables',
-					tooltip: 'Use variables to define targets instead of dropdowns/selections',
-					default: false,
-				},
-				{
 					id: 'source',
 					type: 'dropdown',
 					label: 'Source',
 					choices: self.state.sources,
 					default: '',
 					allowCustom: true,
-					isVisibleExpression: '!$(options:useVariables)',
-				},
-				{
-					id: 'source_var',
-					type: 'textinput',
-					label: 'Source',
-					tooltip: 'Specify a source by name (e.g. "SAT 1") or number (e.g. 6)',
-					regex: '/^[^~\\{},]+$/',
-					useVariables: true,
-					default: '',
-					isVisibleExpression: '$(options:useVariables)',
 				},
 				{
 					id: 'dest',
@@ -79,16 +61,6 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					choices: self.state.destinations,
 					default: '',
 					allowCustom: true,
-					isVisibleExpression: '!$(options:useVariables)',
-				},
-				{
-					id: 'dest_var',
-					type: 'textinput',
-					label: 'Destination',
-					tooltip: 'Specify a destination by name (e.g. "MON 6") or number (e.g. 1). ',
-					default: '',
-					useVariables: true,
-					isVisibleExpression: '$(options:useVariables)',
 				},
 			],
 			callback: async (feedback, context) => {
