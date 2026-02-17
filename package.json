@@ -1,25 +1,45 @@
 {
 	"name": "imagine-lrc",
-	"version": "2.3.0",
-	"main": "src/main.js",
+	"version": "2.3.9-dev",
+	"type": "module",
+	"main": "dist/main.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"postinstall": "husky",
 		"format": "prettier -w .",
-		"lint:raw": "eslint --ext .ts --ext .js --ignore-pattern dist --ignore-pattern pkg",
-		"lint": "yarn lint:raw .",
-		"package": "companion-module-build"
+		"package": "npm run build && companion-module-build",
+		"build": "rimraf dist && npm run build:main",
+		"build:main": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch",
+		"lint:raw": "eslint",
+		"lint": "run lint:raw ."
 	},
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-imagine-lrc.git"
 	},
-	"prettier": "@companion-module/tools/.prettierrc.json",
-	"packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
 	"dependencies": {
-		"@companion-module/base": "~1.12.1"
+		"@companion-module/base": "~1.14"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^1.5.2"
-	}
+		"@companion-module/tools": "^2.3.0",
+		"@types/node": "^22.14.1",
+		"eslint": "^9.24.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.5.1",
+		"prettier": "^3.5.3",
+		"rimraf": "^6.0.1",
+		"typescript": "~5.8.3",
+		"typescript-eslint": "^8.30.1"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json",
+	"lint-staged": {
+		"*.{css,json,md,scss}": [
+			"prettier --write"
+		],
+		"*.{ts,tsx,js,jsx}": [
+			"yarn lint:raw --fix"
+		]
+	},
+	"packageManager": "yarn@4.12.0"
 }

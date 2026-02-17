@@ -15,10 +15,10 @@
 	],
 	"legacyIds": [],
 	"runtime": {
-		"type": "node18",
+		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "../src/main.js"
+		"entrypoint": "../dist/main.js"
 	},
 	"manufacturer": "Imagine Communications",
 	"products": ["Logical Router Control"],
