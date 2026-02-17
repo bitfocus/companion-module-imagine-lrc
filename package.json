@@ -1,6 +1,6 @@
 {
 	"name": "imagine-lrc",
-	"version": "2.3.9-dev",
+	"version": "3.0.0",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
