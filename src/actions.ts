@@ -316,12 +316,16 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: (action) => {
-				const salvo = self.state.resolveTarget(LRCEntityType.XSALVO, `${action.options.salvo_id}`)
+				const salvoIdentifier = `${action.options.salvo_id}`
 
-				if (salvo) {
+				if (salvoIdentifier) {
 					const message = new LRCMessage(LRCEntityType.XSALVO, LRCOperation.CHANGE_REQUEST)
 
-					message.addArgument('ID', LRCArgumentType.NUMERIC, salvo.id)
+					message.addArgument(
+						'ID',
+						Number.isNaN(Number(salvoIdentifier)) ? LRCArgumentType.STRING : LRCArgumentType.NUMERIC,
+						salvoIdentifier,
+					)
 
 					if (self.config.send_user_id_with_xsalvo) {
 						message.addArgument('U', LRCArgumentType.NUMERIC, self.config.user_id)
